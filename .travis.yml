@@ -1,0 +1,34 @@
+language: node_js
+os: linux
+
+branches:
+  only:
+    - master
+    - next
+    - next-major
+    - beta
+    - alpha
+    - /^v\\d+\\.\\d+(\\.\\d+)?(-\\S*)?$/
+
+jobs:
+  include:
+    - stage: commit
+      node_js: lts/*
+      cache: npm
+      script:
+        - commitlint-travis
+    - stage: test
+      node_js: lts/*
+      cache: npm
+      script: npm run test
+    - stage: release
+      node_js: lts/*
+      cache: npm
+      script: 
+        - npm run build
+      deploy:
+        provider: script
+        skip_cleanup: true
+        script: npx semantic-release
+        on:
+          all_branches: true
