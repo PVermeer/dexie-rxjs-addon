@@ -1,1 +1,1 @@
-export { some } from './dexie-rxjs';
+export { dexieRxjs } from './dexie-rxjs';
