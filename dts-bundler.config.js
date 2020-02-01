@@ -4,7 +4,7 @@ const configLib = require('./config');
 /** @type import('dts-bundle-generator/config-schema').BundlerConfig */
 const config = {
     compilationOptions: {
-        preferredConfigPath: './tsconfig.json',
+        preferredConfigPath: './tsconfig.json'
     },
 
     entries: [

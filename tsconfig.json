@@ -14,7 +14,7 @@
     "target": "ES5",
     "typeRoots": [
       "node_modules/@types",
-      "./types"
+      "src/types"
     ],
     "lib": [
       "es2018",
@@ -30,5 +30,10 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "files": ["./src/index.ts"]
+  "files": [
+    "src/index.ts"
+  ],
+  "include": [
+    "src/types"
+  ]
 }
