@@ -7,15 +7,15 @@ describe('Rxjs', () => {
     databasesPositive.forEach(database => {
         describe(database.desc, () => {
             let db: ReturnType<typeof database.db>;
-            let subs = new Subscription();
+            let subs: Subscription;
             beforeEach(async () => {
+                subs = new Subscription();
                 db = database.db();
                 await db.open();
                 expect(db.isOpen()).toBeTrue();
             });
             afterEach(async () => {
                 subs.unsubscribe();
-                subs = new Subscription();
                 await db.delete();
             });
             describe('db.changes$', () => {
