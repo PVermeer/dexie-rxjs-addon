@@ -63,6 +63,10 @@ function karmaConfig(config) {
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
+        browserConsoleLogOptions: {
+            level: 'error',
+            terminal: true
+        },
         autoWatch: true,
         singleRun: true,
         restartOnFileChange: true
