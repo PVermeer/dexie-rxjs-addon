@@ -1,8 +1,9 @@
 // tslint:disable: space-before-function-paren
 // tslint:disable: object-literal-shorthand
 import { IndexableType } from 'dexie';
+import { isEqual } from 'lodash';
 import { from, fromEventPattern } from 'rxjs';
-import { distinctUntilChanged, flatMap, map, share, startWith, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, flatMap, map, share, startWith, switchMap } from 'rxjs/operators';
 import Dexie from './types/augment-dexie';
 import { ICreateChange, IDatabaseChange, IUpdateChange } from './types/augment-dexie-observable-api';
 
@@ -10,7 +11,8 @@ type ChangeCb = [IDatabaseChange[], boolean];
 type CollectionExtended = Dexie.Collection<any, any> & {
     _ctx: {
         table: Dexie.Table<any, any>;
-      }};
+    }
+};
 
 export function addChanges$(db: Dexie) {
 
@@ -32,10 +34,13 @@ export function addGet$(db: Dexie) {
         ) {
             return from(this.get(key)).pipe(
                 switchMap(original => db.changes$.pipe(
+                    filter(x => x.some(y => this.name === y.table && key === y.key)),
                     startWith([]),
-                    map(changes => {
+                    map((changes, i) => {
 
-                        let record: object | undefined = original;
+                        if (i === 0) { return original; }
+
+                        let record: object | undefined;
                         changes.forEach(change => {
                             const table = change.table;
                             const primKey = change.key;
@@ -64,8 +69,8 @@ export function addGet$(db: Dexie) {
                         return record;
                     }),
                 )),
-                distinctUntilChanged(),
-                share()
+                share(),
+                distinctUntilChanged(isEqual)
             );
         }
     });
@@ -77,19 +82,17 @@ export function addWhere$(db: Dexie) {
         get: function (this: CollectionExtended) {
             return from(this.toArray()).pipe(
                 switchMap(original => db.changes$.pipe(
+                    filter(x => x.some(y => y.table === this._ctx.table.name)),
                     startWith([]),
-                    flatMap(async changes => {
-                        let records: object | undefined = original;
+                    flatMap(async (_, i) => {
 
-                        if (changes.some(y => y.table === this._ctx.table.name)) {
-                            records = await this.toArray();
-                        }
+                        if (i === 0) { return original; }
+                        return this.toArray();
 
-                        return records;
                     }),
                 )),
-                distinctUntilChanged(),
-                share()
+                share(),
+                distinctUntilChanged(isEqual)
             );
         }
 

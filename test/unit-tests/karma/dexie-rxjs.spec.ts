@@ -1,4 +1,5 @@
 // tslint:disable: no-non-null-assertion
+import faker from 'faker/locale/nl';
 import { Observable, Subscription } from 'rxjs';
 import { map, take } from 'rxjs/operators';
 import { databasesPositive, Friend, mockFriends } from '../../mocks/mocks';
@@ -207,9 +208,74 @@ describe('Rxjs', () => {
                             await emitPromise;
                             expect(obsFriend).toEqual(friends[index]);
                         });
+                        it('should not emit when no changes', async () => {
+                            const friends = mockFriends(50);
+                            const updateFriends = [...friends.map(x => {
+                                const { customId, ...rest } = x;
+                                return rest;
+                            })];
+                            const ids = await Promise.all(friends.map(x => db.friends.add(x)));
+
+                            const idx1 = faker.random.number({ min: 0, max: 9 });
+                            const id1 = ids[idx1];
+                            let emitCount = 0;
+
+                            const waits = new Array(4).fill(null).map(() => flatPromise());
+                            subs.add(method.obs$(id1).subscribe(
+                                () => {
+                                    emitCount++;
+                                    switch (emitCount) {
+                                        case 1:
+                                            waits[0].resolve();
+                                            break;
+                                        case 2:
+                                            waits[1].resolve();
+                                            waits[2].resolve();
+                                            waits[3].resolve();
+                                            break;
+                                    }
+                                }
+                            ));
+                            // First emit
+                            await waits[0].promise;
+                            expect(emitCount).toBe(1);
+
+                            // Update different record
+                            const idx2 = faker.random.number({ min: 10, max: 19 });
+                            const id2 = ids[idx2];
+                            await db.friends.update(id2, updateFriends[idx2]);
+                            setTimeout(() => waits[1].resolve(), 500);
+                            await waits[1].promise;
+                            expect(emitCount).toBe(1);
+
+                            // Update record with same data
+                            await db.friends.update(id1, updateFriends[idx1]);
+                            setTimeout(() => waits[2].resolve(), 500);
+                            await waits[2].promise;
+                            expect(emitCount).toBe(1);
+
+                            // Update record with different data
+                            await db.friends.update(id1, updateFriends[49]);
+                            await waits[3].promise;
+                            expect(emitCount).toBe(2);
+                        });
                     });
                 });
             });
         });
     });
 });
+
+// ========== Helper functions ===========
+function flatPromise() {
+
+    let resolve: () => void;
+    let reject: () => void;
+
+    const promise = new Promise((res, rej) => {
+        resolve = res;
+        reject = rej;
+    });
+
+    return { promise, resolve: resolve!, reject: reject! };
+}
