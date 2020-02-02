@@ -1,10 +1,11 @@
 // tslint:disable: unified-signatures
 import Dexie from 'dexie';
 import 'dexie-observable';
-import { addProperties } from './add-properties';
+import { addChanges$, addGet$ } from './add-properties';
 
 export function dexieRxjs(db: Dexie) {
 
-    addProperties(db);
+    addChanges$(db);
+    addGet$(db);
 
 }

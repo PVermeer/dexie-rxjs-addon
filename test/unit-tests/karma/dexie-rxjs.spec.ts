@@ -175,10 +175,15 @@ describe('Rxjs', () => {
                     expect(obsFriend).toBe(undefined);
                 });
                 it('should emit when record is created after subscribe', async () => {
+                    const friends = mockFriends(50);
                     let emitCount = 0;
                     let obsFriend: Friend | undefined;
                     const emitPromise = new Promise(resolve => {
-                        subs.add(db.friends.get$(2).subscribe(
+                        subs.add(db.friends.get$(
+                            database.desc === 'TestDatabaseCustomKey' ?
+                                friends[12].customId :
+                                13
+                        ).subscribe(
                             friendEmit => {
                                 emitCount++;
                                 obsFriend = friendEmit;
@@ -186,10 +191,10 @@ describe('Rxjs', () => {
                             }
                         ));
                     });
-                    const [newFriend] = mockFriends(1);
-                    await db.friends.add(newFriend); // should be key 2
+                    const ids = await Promise.all(friends.map(x => db.friends.add(x)));
+                    const index = ids.findIndex(x => x === 13 || x === friends[12].customId);
                     await emitPromise;
-                    expect(obsFriend).toEqual(newFriend);
+                    expect(obsFriend).toEqual(friends[index]);
                 });
             });
         });

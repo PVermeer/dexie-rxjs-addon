@@ -3,13 +3,14 @@ import { dexieRxjs } from '../../src';
 import faker from 'faker/locale/nl';
 
 export interface Friend {
-    id?: string;
+    id?: number;
     testProp?: string;
     hasAge?: boolean;
     firstName: string;
     lastName: string;
     shoeSize: number;
-    customId: string;
+    customId: number;
+    some?: { id: number; };
 }
 
 class TestDatabase extends Dexie {
@@ -78,7 +79,7 @@ export const mockFriends = (count: number = 5): Friend[] => {
         lastName: faker.name.lastName(),
         age: faker.random.number({ min: 1, max: 80 }),
         shoeSize: faker.random.number({ min: 5, max: 12 }),
-        customId: faker.random.alphaNumeric(20),
+        customId: faker.random.number({ min: 1000000, max: 9999999 }),
     });
     return new Array(count).fill(null).map(() => friend());
 };

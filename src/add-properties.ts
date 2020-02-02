@@ -4,11 +4,11 @@ import { IndexableType } from 'dexie';
 import { from, fromEventPattern } from 'rxjs';
 import { distinctUntilChanged, map, share, startWith, switchMap } from 'rxjs/operators';
 import Dexie from './types/augment-dexie';
-import { IDatabaseChange, ICreateChange } from './types/augment-dexie-observable-api';
+import { IDatabaseChange, ICreateChange, IUpdateChange } from './types/augment-dexie-observable-api';
 
 type ChangeCb = [IDatabaseChange[], boolean];
 
-export function addProperties(db: Dexie) {
+export function addChanges$(db: Dexie) {
 
     Object.defineProperty(db, 'changes$', {
         value: fromEventPattern<ChangeCb>(handler => db.on('changes', handler)).pipe(
@@ -16,6 +16,10 @@ export function addProperties(db: Dexie) {
             share()
         )
     });
+
+}
+
+export function addGet$(db: Dexie) {
 
     Object.defineProperty(db.Table.prototype, 'get$', {
         value: function (
@@ -27,31 +31,36 @@ export function addProperties(db: Dexie) {
                     startWith([]),
                     map(changes => {
 
-                        let record = original;
+                        let record: object | undefined = original;
                         changes.forEach(change => {
                             const table = change.table;
                             const primKey = change.key;
 
-                            if (change.type === 1) {
-                                record = (change as ICreateChange).obj;
+                            if (this.name === table && key === primKey) {
 
-                            } else if (change.type === 2 && 'mods' in change) {
-                                if (this.name === table && key === primKey) {
-                                    record = change.obj;
+                                switch (change.type) {
+                                    case 1: {
+                                        record = (change as ICreateChange).obj;
+                                        break;
+                                    }
+                                    case 2: {
+                                        record = (change as IUpdateChange).obj;
+                                        break;
+                                    }
+                                    case 3:
+                                    default: {
+                                        record = undefined;
+                                    }
                                 }
-
-                            } else if (change.type === 3) {
-                                record = undefined;
-                            }
-
-                            if (record) {
-                                record = setPrimaryKey(this.schema.primKey, record, primKey);
+                                if (record) {
+                                    record = setPrimaryKey(this.schema.primKey, record, primKey);
+                                }
                             }
                         });
                         return record;
                     }),
-                    distinctUntilChanged()
                 )),
+                distinctUntilChanged(),
                 share()
             );
         }
@@ -59,9 +68,9 @@ export function addProperties(db: Dexie) {
 }
 
 // ========= Helper functions ==========
-function setPrimaryKey<T = { [prop: string]: any }>(
+function setPrimaryKey<T>(
     primKey: Dexie.IndexSpec,
-    object: T,
+    object: T & object,
     value: IndexableType
 ): T {
 
