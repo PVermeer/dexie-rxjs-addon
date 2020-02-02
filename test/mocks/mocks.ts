@@ -12,7 +12,7 @@ export interface Friend {
     customId: string;
 }
 
-export class TestDatabase extends Dexie {
+class TestDatabase extends Dexie {
     public friends: Dexie.Table<Friend, number>;
     constructor(name: string) {
         super(name);
@@ -22,7 +22,7 @@ export class TestDatabase extends Dexie {
         });
     }
 }
-export class TestDatabaseKeyPath extends Dexie {
+class TestDatabaseKeyPath extends Dexie {
     public friends: Dexie.Table<Friend, number>;
     constructor(name: string) {
         super(name);
@@ -32,7 +32,7 @@ export class TestDatabaseKeyPath extends Dexie {
         });
     }
 }
-export class TestDatabaseCustomKey extends Dexie {
+class TestDatabaseCustomKey extends Dexie {
     public friends: Dexie.Table<Friend, number>;
     constructor(name: string) {
         super(name);
@@ -42,7 +42,7 @@ export class TestDatabaseCustomKey extends Dexie {
         });
     }
 }
-export class TestDatabaseNoKey extends Dexie {
+class TestDatabaseNoKey extends Dexie {
     public friends: Dexie.Table<Friend, number>;
     constructor(name: string) {
         super(name);

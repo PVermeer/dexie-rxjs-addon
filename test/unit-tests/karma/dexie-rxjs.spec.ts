@@ -1,12 +1,12 @@
 // tslint:disable: no-non-null-assertion
 import { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { databasesPositive, Friend, mockFriends, TestDatabase } from '../../mocks/mocks';
+import { databasesPositive, Friend, mockFriends } from '../../mocks/mocks';
 
 describe('Rxjs', () => {
     databasesPositive.forEach(database => {
         describe(database.desc, () => {
-            let db: TestDatabase;
+            let db: ReturnType<typeof database.db>;
             let subs = new Subscription();
             beforeEach(async () => {
                 db = database.db();
