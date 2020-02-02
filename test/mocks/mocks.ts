@@ -9,6 +9,7 @@ export interface Friend {
     firstName: string;
     lastName: string;
     shoeSize: number;
+    customId: string;
 }
 
 export class TestDatabase extends Dexie {
@@ -41,6 +42,16 @@ export class TestDatabaseCustomKey extends Dexie {
         });
     }
 }
+export class TestDatabaseNoKey extends Dexie {
+    public friends: Dexie.Table<Friend, number>;
+    constructor(name: string) {
+        super(name);
+        dexieRxjs(this);
+        this.version(1).stores({
+            friends: '++, firstName, lastName, shoeSize, age'
+        });
+    }
+}
 
 export const databasesPositive = [
     {
@@ -54,6 +65,10 @@ export const databasesPositive = [
     {
         desc: 'TestDatabaseCustomKey',
         db: () => new TestDatabaseCustomKey('TestDatabaseCustomKey')
+    },
+    {
+        desc: 'TestDatabaseNoKey',
+        db: () => new TestDatabaseNoKey('TestDatabaseNoKey')
     }
 ];
 
@@ -63,7 +78,7 @@ export const mockFriends = (count: number = 5): Friend[] => {
         lastName: faker.name.lastName(),
         age: faker.random.number({ min: 1, max: 80 }),
         shoeSize: faker.random.number({ min: 5, max: 12 }),
-        customId: faker.random.alphaNumeric(20)
+        customId: faker.random.alphaNumeric(20),
     });
     return new Array(count).fill(null).map(() => friend());
 };

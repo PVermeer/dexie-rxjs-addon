@@ -114,6 +114,12 @@ describe('Rxjs', () => {
                             expect(getOldFriend).toEqual(jasmine.objectContaining({ customId: id }));
                             break;
                         }
+                        case 'TestDatabaseNoKey': {
+                            expect(getFriend!.id).toBeUndefined();
+                            expect(getNewFriend!.id).toBeUndefined();
+                            expect(getOldFriend!.id).toBeUndefined();
+                            break;
+                        }
                         default: {
                             expect(getFriend).toEqual(jasmine.objectContaining({ id }));
                             expect(getNewFriend).toEqual(jasmine.objectContaining({ id: newId }));
@@ -169,7 +175,6 @@ describe('Rxjs', () => {
                     expect(obsFriend).toBe(undefined);
                 });
                 it('should emit when record is created after subscribe', async () => {
-                    db.changes$.subscribe(console.log);
                     let emitCount = 0;
                     let obsFriend: Friend | undefined;
                     const emitPromise = new Promise(resolve => {

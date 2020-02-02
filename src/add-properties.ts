@@ -68,7 +68,7 @@ function setPrimaryKey<T = { [prop: string]: any }>(
     if (primKey.compound || primKey.multi) {
         throw new Error('Compound or multi primary key is not (yet) supported');
     }
-    if (!primKey.auto) { return object; }
+    if (!primKey.auto || primKey.keyPath === null) { return object; }
 
     const splitted = (primKey.keyPath as string).split('.');
     splitted.reduce((obj, current, i) => {
