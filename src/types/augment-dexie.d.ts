@@ -12,6 +12,9 @@ declare module 'dexie' {
         interface Table<T, Key> {
             get$(key: Key): Observable<T | undefined>;
         }
+        interface Collection<T, Key> {
+            $: Observable<T[]>;
+        }
     }
 }
 

@@ -19,7 +19,7 @@ class TestDatabase extends Dexie {
         super(name);
         dexieRxjs(this);
         this.version(1).stores({
-            friends: '++id, firstName, lastName, shoeSize, age'
+            friends: '++id, customId, firstName, lastName, shoeSize, age'
         });
     }
 }
@@ -29,7 +29,7 @@ class TestDatabaseKeyPath extends Dexie {
         super(name);
         dexieRxjs(this);
         this.version(1).stores({
-            friends: '++some.id, firstName, lastName, shoeSize, age'
+            friends: '++some.id, customId, firstName, lastName, shoeSize, age'
         });
     }
 }
@@ -49,7 +49,7 @@ class TestDatabaseNoKey extends Dexie {
         super(name);
         dexieRxjs(this);
         this.version(1).stores({
-            friends: '++, firstName, lastName, shoeSize, age'
+            friends: '++, firstName, customId, lastName, shoeSize, age'
         });
     }
 }

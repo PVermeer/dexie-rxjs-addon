@@ -2,11 +2,15 @@
 // tslint:disable: object-literal-shorthand
 import { IndexableType } from 'dexie';
 import { from, fromEventPattern } from 'rxjs';
-import { distinctUntilChanged, map, share, startWith, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, flatMap, map, share, startWith, switchMap } from 'rxjs/operators';
 import Dexie from './types/augment-dexie';
-import { IDatabaseChange, ICreateChange, IUpdateChange } from './types/augment-dexie-observable-api';
+import { ICreateChange, IDatabaseChange, IUpdateChange } from './types/augment-dexie-observable-api';
 
 type ChangeCb = [IDatabaseChange[], boolean];
+type CollectionExtended = Dexie.Collection<any, any> & {
+    _ctx: {
+        table: Dexie.Table<any, any>;
+      }};
 
 export function addChanges$(db: Dexie) {
 
@@ -66,6 +70,32 @@ export function addGet$(db: Dexie) {
         }
     });
 }
+
+export function addWhere$(db: Dexie) {
+
+    Object.defineProperty(db.Collection.prototype, '$', {
+        get: function (this: CollectionExtended) {
+            return from(this.toArray()).pipe(
+                switchMap(original => db.changes$.pipe(
+                    startWith([]),
+                    flatMap(async changes => {
+                        let records: object | undefined = original;
+
+                        if (changes.some(y => y.table === this._ctx.table.name)) {
+                            records = await this.toArray();
+                        }
+
+                        return records;
+                    }),
+                )),
+                distinctUntilChanged(),
+                share()
+            );
+        }
+
+    });
+}
+
 
 // ========= Helper functions ==========
 function setPrimaryKey<T>(
