@@ -19,10 +19,10 @@ function karmaConfig(config) {
         frameworks: ['jasmine'],
         plugins: [
             'karma-jasmine',
-            'karma-jasmine-html-reporter',
             'karma-webpack',
             'karma-chrome-launcher',
-            'karma-mocha-reporter'
+            'karma-mocha-reporter',
+            'karma-jasmine-html-reporter'
         ],
         preprocessors: {
             "**/*.ts": ['webpack'],
@@ -64,14 +64,18 @@ function karmaConfig(config) {
         browsers: ['ChromeDebugging'],
         reporters: ['mocha', 'kjhtml'],
         mochaReporter: {
-            ignoreSkipped: true
+            ignoreSkipped: true,
+            maxLogLines: -1
+        },
+        jasmineHtmlReporter: {
+            suppressFailed: true
         },
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
         browserConsoleLogOptions: {
-            level: 'error',
-            terminal: true
+            level: 'off',
+            terminal: false
         },
         autoWatch: true,
         singleRun: false,
