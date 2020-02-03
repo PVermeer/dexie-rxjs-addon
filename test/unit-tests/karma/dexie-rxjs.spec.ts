@@ -5,7 +5,8 @@ import { map, take } from 'rxjs/operators';
 import { databasesPositive, Friend, mockFriends } from '../../mocks/mocks';
 
 describe('Rxjs', () => {
-    databasesPositive.forEach(database => {
+    databasesPositive.forEach((database, _i) => {
+        // if (_i !== 2) { return; }
         describe(database.desc, () => {
             let db: ReturnType<typeof database.db>;
             let subs: Subscription;
@@ -53,22 +54,39 @@ describe('Rxjs', () => {
             describe('Methods', () => {
                 const methods = [
                     {
-                        desc: 'get$()',
+                        desc: 'Table.get$()',
                         obs$: (id: number) => db.friends.get$(id)
                     },
                     {
-                        desc: 'collection.$',
+                        desc: 'Collection.$',
                         obs$: (id: number) => db.friends.where(':id').equals(id).$.pipe(map(x => x[0]))
+                    },
+                    {
+                        desc: 'Table.$',
+                        obs$: (id: number) => db.friends.$.pipe(
+                            map(x => x.find(y => y.id === id || y.customId === id || (y.some && y.some.id === id)))
+                        )
                     }
                 ];
                 methods.forEach(method => {
                     let friend: Friend;
                     let id: number;
+                    let updateId: number;
                     let obs$: ReturnType<typeof method.obs$>;
+
+                    const addFriend = (friendToAdd: Friend) => db.friends.add(friendToAdd)
+                        .then(newId => {
+                            switch (database.desc) {
+                                case 'TestDatabaseNoKey': return method.desc === 'Table.$' ? friendToAdd.customId : newId;
+                                default: return newId;
+                            }
+                        });
+
                     describe(method.desc, () => {
                         beforeEach(async () => {
                             friend = mockFriends(1)[0];
-                            id = await db.friends.add(friend);
+                            id = await addFriend(friend);
+                            updateId = database.desc !== 'TestDatabaseCustomKey' && id > 1000000 ? 1 : id;
                             obs$ = method.obs$(id);
                         });
                         it('should be an observable', async () => {
@@ -89,7 +107,7 @@ describe('Rxjs', () => {
                             expect(getFriend).toEqual(friend);
 
                             const [newFriend] = mockFriends(1);
-                            const newId = await db.friends.add(newFriend);
+                            const newId = await addFriend(newFriend);
                             const obsNew$ = method.obs$(newId);
                             const getNewFriend = await obsNew$.pipe(take(1)).toPromise();
                             expect(getNewFriend).toEqual(newFriend);
@@ -102,7 +120,7 @@ describe('Rxjs', () => {
                             const getFriend = await obs$.pipe(take(1)).toPromise();
 
                             const [newFriend] = mockFriends(1);
-                            const newId = await db.friends.add(newFriend);
+                            const newId = await addFriend(newFriend);
                             const obsNew$ = method.obs$(newId);
                             const getNewFriend = await obsNew$.pipe(take(1)).toPromise();
 
@@ -151,24 +169,29 @@ describe('Rxjs', () => {
                                     }
                                 ));
                             });
-                            await db.friends.update(id, { firstName: 'TestieUpdate' });
+                            await db.friends.update(updateId, { firstName: 'TestieUpdate' });
                             await emitPromise;
                             expect(obsFriend).toEqual({ ...friend, firstName: 'TestieUpdate' });
                         });
                         it('should emit undefined on record delete', async () => {
                             let emitCount = 0;
                             let obsFriend: Friend | undefined;
-                            const emitPromise = new Promise(resolve => {
-                                subs.add(method.obs$(id).subscribe(
-                                    friendEmit => {
-                                        emitCount++;
-                                        obsFriend = friendEmit;
-                                        if (emitCount === 2) { resolve(); }
+
+                            const waits = new Array(2).fill(null).map(() => flatPromise());
+                            subs.add(method.obs$(id).subscribe(
+                                friendEmit => {
+                                    emitCount++;
+                                    obsFriend = friendEmit;
+                                    switch (emitCount) {
+                                        case 1: waits[0].resolve(); break;
+                                        case 2: waits[1].resolve(); break;
                                     }
-                                ));
-                            });
-                            await db.friends.delete(id);
-                            await emitPromise;
+                                }));
+
+                            await waits[0].promise;
+                            expect(obsFriend).toEqual(friend);
+                            await db.friends.delete(updateId);
+                            await waits[1].promise;
                             expect(obsFriend).toBe(undefined);
                         });
                         it('should emit undefined when id is not found', async () => {
@@ -192,7 +215,8 @@ describe('Rxjs', () => {
                             let obsFriend: Friend | undefined;
                             const emitPromise = new Promise(resolve => {
                                 subs.add(method.obs$(
-                                    database.desc === 'TestDatabaseCustomKey' ?
+                                    database.desc === 'TestDatabaseCustomKey' ||
+                                        (database.desc === 'TestDatabaseNoKey' && method.desc === 'Table.$') ?
                                         friends[12].customId :
                                         13
                                 ).subscribe(
@@ -203,62 +227,71 @@ describe('Rxjs', () => {
                                     }
                                 ));
                             });
-                            const ids = await Promise.all(friends.map(x => db.friends.add(x)));
+                            const ids = await Promise.all(friends.map(x => addFriend(x)));
                             const index = ids.findIndex(x => x === 13 || x === friends[12].customId);
                             await emitPromise;
                             expect(obsFriend).toEqual(friends[index]);
                         });
-                        it('should not emit when no changes', async () => {
-                            const friends = mockFriends(50);
-                            const updateFriends = [...friends.map(x => {
-                                const { customId, ...rest } = x;
-                                return rest;
-                            })];
-                            const ids = await Promise.all(friends.map(x => db.friends.add(x)));
+                        // Specific test per method
+                        switch (method.desc) {
+                            case 'Table.$': {
+                                // Should always emit TODO make test
+                                break;
+                            }
+                            default: {
+                                it('should not emit when no changes', async () => {
+                                    const friends = mockFriends(50);
+                                    const updateFriends = [...friends.map(x => {
+                                        const { customId, ...rest } = x;
+                                        return rest;
+                                    })];
+                                    const ids = await Promise.all(friends.map(x => addFriend(x)));
 
-                            const idx1 = faker.random.number({ min: 0, max: 9 });
-                            const id1 = ids[idx1];
-                            let emitCount = 0;
+                                    const idx1 = faker.random.number({ min: 0, max: 9 });
+                                    const id1 = ids[idx1];
+                                    let emitCount = 0;
 
-                            const waits = new Array(4).fill(null).map(() => flatPromise());
-                            subs.add(method.obs$(id1).subscribe(
-                                () => {
-                                    emitCount++;
-                                    switch (emitCount) {
-                                        case 1:
-                                            waits[0].resolve();
-                                            break;
-                                        case 2:
-                                            waits[1].resolve();
-                                            waits[2].resolve();
-                                            waits[3].resolve();
-                                            break;
-                                    }
-                                }
-                            ));
-                            // First emit
-                            await waits[0].promise;
-                            expect(emitCount).toBe(1);
+                                    const waits = new Array(4).fill(null).map(() => flatPromise());
+                                    subs.add(method.obs$(id1).subscribe(
+                                        () => {
+                                            emitCount++;
+                                            switch (emitCount) {
+                                                case 1:
+                                                    waits[0].resolve();
+                                                    break;
+                                                case 2:
+                                                    waits[1].resolve();
+                                                    waits[2].resolve();
+                                                    waits[3].resolve();
+                                                    break;
+                                            }
+                                        }
+                                    ));
+                                    // First emit
+                                    await waits[0].promise;
+                                    expect(emitCount).toBe(1);
 
-                            // Update different record
-                            const idx2 = faker.random.number({ min: 10, max: 19 });
-                            const id2 = ids[idx2];
-                            await db.friends.update(id2, updateFriends[idx2]);
-                            setTimeout(() => waits[1].resolve(), 500);
-                            await waits[1].promise;
-                            expect(emitCount).toBe(1);
+                                    // Update different record
+                                    const idx2 = faker.random.number({ min: 10, max: 19 });
+                                    const id2 = ids[idx2];
+                                    await db.friends.update(id2, updateFriends[idx2]);
+                                    setTimeout(() => waits[1].resolve(), 500);
+                                    await waits[1].promise;
+                                    expect(emitCount).toBe(1);
 
-                            // Update record with same data
-                            await db.friends.update(id1, updateFriends[idx1]);
-                            setTimeout(() => waits[2].resolve(), 500);
-                            await waits[2].promise;
-                            expect(emitCount).toBe(1);
+                                    // Update record with same data
+                                    await db.friends.update(id1, updateFriends[idx1]);
+                                    setTimeout(() => waits[2].resolve(), 500);
+                                    await waits[2].promise;
+                                    expect(emitCount).toBe(1);
 
-                            // Update record with different data
-                            await db.friends.update(id1, updateFriends[49]);
-                            await waits[3].promise;
-                            expect(emitCount).toBe(2);
-                        });
+                                    // Update record with different data
+                                    await db.friends.update(id1, updateFriends[49]);
+                                    await waits[3].promise;
+                                    expect(emitCount).toBe(2);
+                                });
+                            }
+                        }
                     });
                 });
             });

@@ -49,7 +49,7 @@ class TestDatabaseNoKey extends Dexie {
         super(name);
         dexieRxjs(this);
         this.version(1).stores({
-            friends: '++, firstName, customId, lastName, shoeSize, age'
+            friends: '++, customId, firstName, lastName, shoeSize, age'
         });
     }
 }

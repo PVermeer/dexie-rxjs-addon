@@ -69,11 +69,35 @@ export function addGet$(db: Dexie) {
                         return record;
                     }),
                 )),
-                share(),
-                distinctUntilChanged(isEqual)
+                distinctUntilChanged(isEqual),
+                share()
             );
         }
     });
+}
+
+export function addTable$(db: Dexie) {
+
+    Object.defineProperty(db.Table.prototype, '$', {
+        get: function (this: Dexie.Table<any, any>) {
+            return from(this.toArray()).pipe(
+                switchMap(original => db.changes$.pipe(
+                    filter(x => x.some(y => y.table === this.name)),
+                    startWith([]),
+                    flatMap(async (_, i) => {
+
+                        if (i === 0) { return original; }
+                        return this.toArray();
+
+                    })
+                )),
+                distinctUntilChanged(isEqual),
+                share()
+            );
+        }
+
+    });
+
 }
 
 export function addWhere$(db: Dexie) {
@@ -89,10 +113,10 @@ export function addWhere$(db: Dexie) {
                         if (i === 0) { return original; }
                         return this.toArray();
 
-                    }),
+                    })
                 )),
-                share(),
-                distinctUntilChanged(isEqual)
+                distinctUntilChanged(isEqual),
+                share()
             );
         }
 
