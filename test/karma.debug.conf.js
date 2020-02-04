@@ -14,7 +14,7 @@ function karmaConfig(config) {
         files: [
             './test/unit-tests/karma/index.ts',
             // Serve dist folder so files can be loaded when needed in tests
-            { pattern: './dist/**/*.+(js|map)', included: false, watch: false }
+            { pattern: './dist/**/*.+(js|map)', included: false, watched: false }
         ],
         frameworks: ['jasmine'],
         plugins: [

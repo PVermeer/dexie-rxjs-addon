@@ -57,7 +57,7 @@ const bundleConfig = {
             exclude: /node_modules/,
             options: {
                 configFile: '../src/tsconfig.json'
-            },
+            }
         }]
     },
     resolve: {
