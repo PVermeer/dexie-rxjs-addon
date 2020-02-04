@@ -1,8 +1,9 @@
 // tslint:disable: no-non-null-assertion
+import Dexie from 'dexie';
 import faker from 'faker/locale/nl';
 import { Observable, Subscription } from 'rxjs';
-import { map, take } from 'rxjs/operators';
-import { databasesPositive, Friend, mockFriends } from '../../mocks/mocks';
+import { take } from 'rxjs/operators';
+import { databasesPositive, Friend, methods, mockFriends } from '../../mocks/mocks';
 
 describe('Rxjs', () => {
     databasesPositive.forEach((database, _i) => {
@@ -12,7 +13,7 @@ describe('Rxjs', () => {
             let subs: Subscription;
             beforeEach(async () => {
                 subs = new Subscription();
-                db = database.db();
+                db = database.db(Dexie);
                 await db.open();
                 expect(db.isOpen()).toBeTrue();
             });
@@ -52,27 +53,12 @@ describe('Rxjs', () => {
                 });
             });
             describe('Methods', () => {
-                const methods = [
-                    {
-                        desc: 'Table.get$()',
-                        obs$: (id: number) => db.friends.get$(id)
-                    },
-                    {
-                        desc: 'Collection.$',
-                        obs$: (id: number) => db.friends.where(':id').equals(id).$.pipe(map(x => x[0]))
-                    },
-                    {
-                        desc: 'Table.$',
-                        obs$: (id: number) => db.friends.$.pipe(
-                            map(x => x.find(y => y.id === id || y.customId === id || (y.some && y.some.id === id)))
-                        )
-                    }
-                ];
                 methods.forEach(method => {
                     let friend: Friend;
                     let id: number;
                     let updateId: number;
-                    let obs$: ReturnType<typeof method.obs$>;
+                    let method$: ReturnType<typeof method.method>;
+                    let obs$: ReturnType<ReturnType<typeof method.method>>;
 
                     const addFriend = (friendToAdd: Friend) => db.friends.add(friendToAdd)
                         .then(newId => {
@@ -87,7 +73,8 @@ describe('Rxjs', () => {
                             friend = mockFriends(1)[0];
                             id = await addFriend(friend);
                             updateId = database.desc !== 'TestDatabaseCustomKey' && id > 1000000 ? 1 : id;
-                            obs$ = method.obs$(id);
+                            method$ = method.method(db);
+                            obs$ = method$(id);
                         });
                         it('should be an observable', async () => {
                             expect(obs$ instanceof Observable).toBeTrue();
@@ -108,11 +95,11 @@ describe('Rxjs', () => {
 
                             const [newFriend] = mockFriends(1);
                             const newId = await addFriend(newFriend);
-                            const obsNew$ = method.obs$(newId);
+                            const obsNew$ = method$(newId);
                             const getNewFriend = await obsNew$.pipe(take(1)).toPromise();
                             expect(getNewFriend).toEqual(newFriend);
 
-                            const obsOld$ = method.obs$(id);
+                            const obsOld$ = method$(id);
                             const getOldFriend = await obsOld$.pipe(take(1)).toPromise();
                             expect(getOldFriend).toEqual(friend);
                         });
@@ -121,10 +108,10 @@ describe('Rxjs', () => {
 
                             const [newFriend] = mockFriends(1);
                             const newId = await addFriend(newFriend);
-                            const obsNew$ = method.obs$(newId);
+                            const obsNew$ = method$(newId);
                             const getNewFriend = await obsNew$.pipe(take(1)).toPromise();
 
-                            const obsOld$ = method.obs$(id);
+                            const obsOld$ = method$(id);
                             const getOldFriend = await obsOld$.pipe(take(1)).toPromise();
 
                             switch (database.desc) {
@@ -161,7 +148,7 @@ describe('Rxjs', () => {
                             let emitCount = 0;
                             let obsFriend: Friend | undefined;
                             const emitPromise = new Promise(resolve => {
-                                subs.add(method.obs$(id).subscribe(
+                                subs.add(method$(id).subscribe(
                                     friendEmit => {
                                         emitCount++;
                                         obsFriend = friendEmit;
@@ -178,7 +165,7 @@ describe('Rxjs', () => {
                             let obsFriend: Friend | undefined;
 
                             const waits = new Array(2).fill(null).map(() => flatPromise());
-                            subs.add(method.obs$(id).subscribe(
+                            subs.add(method$(id).subscribe(
                                 friendEmit => {
                                     emitCount++;
                                     obsFriend = friendEmit;
@@ -198,7 +185,7 @@ describe('Rxjs', () => {
                             let emitCount = 0;
                             let obsFriend: Friend | undefined;
                             const emitPromise = new Promise(resolve => {
-                                subs.add(method.obs$(99999999).subscribe(
+                                subs.add(method$(99999999).subscribe(
                                     friendEmit => {
                                         emitCount++;
                                         obsFriend = friendEmit;
@@ -214,7 +201,7 @@ describe('Rxjs', () => {
                             let emitCount = 0;
                             let obsFriend: Friend | undefined;
                             const emitPromise = new Promise(resolve => {
-                                subs.add(method.obs$(
+                                subs.add(method$(
                                     database.desc === 'TestDatabaseCustomKey' ||
                                         (database.desc === 'TestDatabaseNoKey' && method.desc === 'Table.$') ?
                                         friends[12].customId :
@@ -252,7 +239,7 @@ describe('Rxjs', () => {
                                     let emitCount = 0;
 
                                     const waits = new Array(4).fill(null).map(() => flatPromise());
-                                    subs.add(method.obs$(id1).subscribe(
+                                    subs.add(method$(id1).subscribe(
                                         () => {
                                             emitCount++;
                                             switch (emitCount) {

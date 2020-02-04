@@ -1,6 +1,7 @@
-import Dexie from 'dexie';
-import { dexieRxjs } from '../../src';
+import { default as DexieType } from 'dexie';
 import faker from 'faker/locale/nl';
+import { map } from 'rxjs/operators';
+import { dexieRxjs } from '../../src';
 
 export interface Friend {
     id?: number;
@@ -13,63 +14,77 @@ export interface Friend {
     some?: { id: number; };
 }
 
-class TestDatabase extends Dexie {
-    public friends: Dexie.Table<Friend, number>;
-    constructor(name: string) {
-        super(name);
-        dexieRxjs(this);
-        this.version(1).stores({
-            friends: '++id, customId, firstName, lastName, shoeSize, age'
-        });
-    }
-}
-class TestDatabaseKeyPath extends Dexie {
-    public friends: Dexie.Table<Friend, number>;
-    constructor(name: string) {
-        super(name);
-        dexieRxjs(this);
-        this.version(1).stores({
-            friends: '++some.id, customId, firstName, lastName, shoeSize, age'
-        });
-    }
-}
-class TestDatabaseCustomKey extends Dexie {
-    public friends: Dexie.Table<Friend, number>;
-    constructor(name: string) {
-        super(name);
-        dexieRxjs(this);
-        this.version(1).stores({
-            friends: 'customId, firstName, lastName, shoeSize, age'
-        });
-    }
-}
-class TestDatabaseNoKey extends Dexie {
-    public friends: Dexie.Table<Friend, number>;
-    constructor(name: string) {
-        super(name);
-        dexieRxjs(this);
-        this.version(1).stores({
-            friends: '++, customId, firstName, lastName, shoeSize, age'
-        });
-    }
-}
+type TestDatabaseType = DexieType & { friends: DexieType.Table<Friend, number> };
 
 export const databasesPositive = [
     {
         desc: 'TestDatabase',
-        db: () => new TestDatabase('TestDatabase')
+        db: (Dexie: typeof DexieType) => new class TestDatabase extends Dexie {
+            public friends: DexieType.Table<Friend, number>;
+            constructor(name: string) {
+                super(name);
+                dexieRxjs(this);
+                this.version(1).stores({
+                    friends: '++id, customId, firstName, lastName, shoeSize, age'
+                });
+            }
+        }('TestDatabase')
     },
     {
         desc: 'TestDatabaseKeyPath',
-        db: () => new TestDatabaseKeyPath('TestDatabaseKeyPath')
+        db: (Dexie: typeof DexieType) => new class TestDatabaseKeyPath extends Dexie {
+            public friends: DexieType.Table<Friend, number>;
+            constructor(name: string) {
+                super(name);
+                dexieRxjs(this);
+                this.version(1).stores({
+                    friends: '++some.id, customId, firstName, lastName, shoeSize, age'
+                });
+            }
+        }('TestDatabaseKeyPath')
     },
     {
         desc: 'TestDatabaseCustomKey',
-        db: () => new TestDatabaseCustomKey('TestDatabaseCustomKey')
+        db: (Dexie: typeof DexieType) => new class TestDatabaseCustomKey extends Dexie {
+            public friends: DexieType.Table<Friend, number>;
+            constructor(name: string) {
+                super(name);
+                dexieRxjs(this);
+                this.version(1).stores({
+                    friends: 'customId, firstName, lastName, shoeSize, age'
+                });
+            }
+        }('TestDatabaseCustomKey')
     },
     {
         desc: 'TestDatabaseNoKey',
-        db: () => new TestDatabaseNoKey('TestDatabaseNoKey')
+        db: (Dexie: typeof DexieType) => new class TestDatabaseNoKey extends Dexie {
+            public friends: DexieType.Table<Friend, number>;
+            constructor(name: string) {
+                super(name);
+                dexieRxjs(this);
+                this.version(1).stores({
+                    friends: '++, customId, firstName, lastName, shoeSize, age'
+                });
+            }
+        }('TestDatabaseNoKey')
+    }
+];
+
+export const methods = [
+    {
+        desc: 'Table.get$()',
+        method: (db: TestDatabaseType) => (id: number) => db.friends.get$(id)
+    },
+    {
+        desc: 'Collection.$',
+        method: (db: TestDatabaseType) => (id: number) => db.friends.where(':id').equals(id).$.pipe(map(x => x[0]))
+    },
+    {
+        desc: 'Table.$',
+        method: (db: TestDatabaseType) => (id: number) => db.friends.$.pipe(
+            map(x => x.find(y => y.id === id || y.customId === id || (y.some && y.some.id === id)))
+        )
     }
 ];
 
