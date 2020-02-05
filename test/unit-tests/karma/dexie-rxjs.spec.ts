@@ -7,7 +7,7 @@ import { databasesPositive, Friend, methods, mockFriends } from '../../mocks/moc
 
 describe('Rxjs', () => {
     databasesPositive.forEach((database, _i) => {
-        // if (_i !== 2) { return; }
+        // if (_i !== 3) { return; }
         describe(database.desc, () => {
             let db: ReturnType<typeof database.db>;
             let subs: Subscription;
@@ -222,7 +222,93 @@ describe('Rxjs', () => {
                         // Specific test per method
                         switch (method.desc) {
                             case 'Table.$': {
-                                // Should always emit TODO make test
+                                it('should be an array', async () => {
+                                    const table = await db.friends.$.pipe(take(1)).toPromise();
+                                    expect(table).toEqual([friend]);
+                                });
+                                it('should emit on adding/removing to the table', async () => {
+                                    const table$ = db.friends.$;
+                                    let table: Friend[];
+                                    let emitCount = 0;
+                                    const waits = new Array(3).fill(null).map(() => flatPromise());
+                                    subs.add(table$.subscribe(emit => {
+                                        table = emit;
+                                        emitCount++;
+                                        switch (emitCount) {
+                                            case 1: waits[0].resolve(); break;
+                                            case 2: waits[1].resolve(); break;
+                                            case 3: waits[2].resolve(); break;
+                                        }
+                                    }));
+
+                                    await waits[0].promise;
+                                    expect(emitCount).toBe(1);
+                                    expect(table!).toEqual([friend]);
+
+                                    const friends = mockFriends(9);
+                                    await Promise.all(friends.map(x => db.friends.add(x)));
+                                    await waits[1].promise;
+                                    expect(emitCount).toBe(2);
+                                    expect(table!).toEqual(jasmine.arrayContaining([
+                                        friend,
+                                        ...friends.map(x => jasmine.objectContaining(x))
+                                    ]));
+                                    expect(table!.length).toBe(10);
+
+                                    await db.friends.delete(updateId);
+                                    await waits[2].promise;
+                                    expect(emitCount).toBe(3);
+                                    expect(table!).toEqual(jasmine.arrayContaining(
+                                        friends.map(x => jasmine.objectContaining(x))
+                                    ));
+                                    expect(table!.length).toBe(9);
+                                });
+                                it('should emit on updating a record on the table', async () => {
+                                    const table$ = db.friends.$;
+                                    let table: Friend[];
+                                    let emitCount = 0;
+                                    const waits = new Array(2).fill(null).map(() => flatPromise());
+                                    subs.add(table$.subscribe(emit => {
+                                        table = emit;
+                                        emitCount++;
+                                        switch (emitCount) {
+                                            case 1: waits[0].resolve(); break;
+                                            case 2: waits[1].resolve(); break;
+                                        }
+                                    }));
+
+                                    await waits[0].promise;
+                                    expect(emitCount).toBe(1);
+                                    expect(table!).toEqual([friend]);
+
+                                    await db.friends.update(updateId, { lastName: 'TestieTest' });
+                                    await waits[1].promise;
+                                    expect(emitCount).toBe(2);
+                                    expect(table!).toEqual([{ ...friend, lastName: 'TestieTest' }]);
+                                });
+                                it('should not emit on updating a record on the table with same data', async () => {
+                                    const table$ = db.friends.$;
+                                    let table: Friend[];
+                                    let emitCount = 0;
+                                    const waits = new Array(2).fill(null).map(() => flatPromise());
+                                    subs.add(table$.subscribe(emit => {
+                                        table = emit;
+                                        emitCount++;
+                                        switch (emitCount) {
+                                            case 1: waits[0].resolve(); break;
+                                            case 2: waits[1].resolve(); break;
+                                        }
+                                    }));
+
+                                    await waits[0].promise;
+                                    expect(table!).toEqual([friend]);
+
+                                    await db.friends.update(updateId, { lastName: friend.lastName });
+                                    setTimeout(() => waits[1].resolve(), 500);
+                                    await waits[1].promise;
+                                    expect(emitCount).toBe(1);
+                                    expect(table!).toEqual([friend]);
+                                });
                                 break;
                             }
                             default: {
@@ -289,13 +375,13 @@ describe('Rxjs', () => {
 // ========== Helper functions ===========
 function flatPromise() {
 
-    let resolve: () => void;
-    let reject: () => void;
+    let resolve!: () => void;
+    let reject!: () => void;
 
     const promise = new Promise((res, rej) => {
         resolve = res;
         reject = rej;
     });
 
-    return { promise, resolve: resolve!, reject: reject! };
+    return { promise, resolve, reject };
 }
