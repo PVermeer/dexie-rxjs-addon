@@ -3,7 +3,7 @@ import Dexie from 'dexie';
 import faker from 'faker/locale/nl';
 import { Observable, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
-import { databasesPositive, Friend, methods, mockFriends } from '../../mocks/mocks';
+import { databasesNegative, databasesPositive, Friend, methods, mockFriends } from '../../mocks/mocks';
 
 describe('Rxjs', () => {
     databasesPositive.forEach((database, _i) => {
@@ -367,6 +367,21 @@ describe('Rxjs', () => {
                         }
                     });
                 });
+            });
+        });
+    });
+    databasesNegative.forEach(database => {
+        describe(database.desc, () => {
+            let db: ReturnType<typeof database.db>;
+            beforeEach(async () => {
+                db = database.db(Dexie);
+            });
+            afterEach(async () => {
+                await db.delete();
+            });
+            it('should throw when compound / multi index is used', async () => {
+                await expectAsync(db.open()).toBeRejectedWithError('Compound or multi indices are not (yet) supported');
+                expect(db.isOpen()).toBeFalse();
             });
         });
     });

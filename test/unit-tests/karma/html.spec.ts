@@ -1,7 +1,6 @@
 import DexieType from 'dexie';
 import * as rxjsImport from 'rxjs';
 import * as rxjsOperators from 'rxjs/operators';
-import configLib from '../../../config.js';
 import { dexieRxjs } from '../../../src/index';
 import { databasesPositive, Friend, methods, mockFriends } from '../../mocks/mocks';
 
@@ -30,7 +29,7 @@ describe('HTML script tag', () => {
         ]);
         await new Promise(resolve => {
             const script = document.createElement('script');
-            script.src = `/base/dist/${configLib.packageName}.min.js`;
+            script.src = `/base/dist/dexie-rxjs-addon.min.js`;
             script.type = 'text/javascript';
             script.onload = () => resolve();
             document.head.append(script);

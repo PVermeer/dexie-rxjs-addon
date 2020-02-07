@@ -71,6 +71,35 @@ export const databasesPositive = [
     }
 ];
 
+export const databasesNegative = [
+    {
+        desc: 'TestDatabaseCompoundIndex',
+        db: (Dexie: typeof DexieType) => new class TestDatabaseCompoundIndex extends Dexie {
+            public friends: DexieType.Table<Friend, number>;
+            constructor(name: string) {
+                super(name);
+                dexieRxjs(this);
+                this.version(1).stores({
+                    friends: '++id, firstName, lastName, [firstName+lastName], shoeSize, age'
+                });
+            }
+        }('TestDatabaseCompoundIndex')
+    },
+    {
+        desc: 'TestDatabaseMultiIndex',
+        db: (Dexie: typeof DexieType) => new class TestDatabaseMultiIndex extends Dexie {
+            public friends: DexieType.Table<Friend, number>;
+            constructor(name: string) {
+                super(name);
+                dexieRxjs(this);
+                this.version(1).stores({
+                    friends: '++id, multi*, firstName, lastName, shoeSize, age'
+                });
+            }
+        }('TestDatabaseMultiIndex')
+    }
+];
+
 export const methods = [
     {
         desc: 'Table.get$()',
