@@ -2,7 +2,14 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "sourceMap": true,
-    "module": "CommonJS"
+    "module": "CommonJS",
+
+    // Please be not so strict in test
+    "strict": false,
+    "noFallthroughCasesInSwitch": false,
+    "noImplicitReturns": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
   },
   "include": [
     "../test",
