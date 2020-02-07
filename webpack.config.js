@@ -1,9 +1,11 @@
+// @ts-check
 const path = require('path');
 const nodeExternals = require('webpack-node-externals');
 const configLib = require('./config');
 const LicenseWebpackPlugin = require('license-webpack-plugin').LicenseWebpackPlugin;
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
+/** @type import('webpack/declarations/WebpackOptions').WebpackOptions */
 const umdConfig = {
     entry: './src/index.ts',
     output: {
@@ -35,6 +37,7 @@ const umdConfig = {
     devtool: 'source-map'
 };
 
+/** @type import('webpack/declarations/WebpackOptions').WebpackOptions */
 const bundleConfig = {
     entry: './src/index.ts',
     output: {
@@ -67,6 +70,7 @@ const bundleConfig = {
         }
     },
     devtool: 'source-map',
+    /** @type any[] */
     plugins: [
         new LicenseWebpackPlugin({
             perChunkOutput: false,

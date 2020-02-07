@@ -11,6 +11,23 @@
             "port": 9333,
             "url": "http://localhost:9876/debug.html",
             "webRoot": "${workspaceFolder}"
+        },
+        {
+            "name": "Run Jasmine (node) tests",
+            "type": "node",
+            "request": "launch",
+            "args": [
+                "${workspaceRoot}/node_modules/jasmine/bin/jasmine",
+                "--config=test/jasmine.conf.json",
+                "--reporter=jasmine-console-reporter"
+            ],
+            "runtimeArgs": [
+                "-r",
+                "ts-node/register"
+            ],
+            "cwd": "${workspaceRoot}",
+            "protocol": "inspector",
+            "console": "integratedTerminal"
         }
     ]
 }
