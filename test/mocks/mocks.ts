@@ -1,6 +1,7 @@
 import { default as DexieType } from 'dexie';
 import faker from 'faker/locale/nl';
-import { map } from 'rxjs/operators';
+import { EMPTY, Observable, of } from 'rxjs';
+import { flatMap, map } from 'rxjs/operators';
 import { dexieRxjs } from '../../src';
 
 export interface Friend {
@@ -100,22 +101,34 @@ export const databasesNegative = [
     }
 ];
 
-export const methods = [
-    {
-        desc: 'Table.get$()',
-        method: (db: TestDatabaseType) => (id: number) => db.friends.get$(id)
-    },
-    {
-        desc: 'Collection.$',
-        method: (db: TestDatabaseType) => (id: number) => db.friends.where(':id').equals(id).$.pipe(map(x => x[0]))
-    },
-    {
-        desc: 'Table.$',
-        method: (db: TestDatabaseType) => (id: number) => db.friends.$.pipe(
-            map(x => x.find(y => y.id === id || y.customId === id || (y.some && y.some.id === id)))
-        )
-    }
-];
+export const methods: {
+    desc: string,
+    method: (db: TestDatabaseType) => (id: number, emitUndefined?: boolean) => Observable<Friend>
+}[] = [
+        {
+            desc: 'Table.get$()',
+            method: (db: TestDatabaseType) => (id: number) => db.friends.get$(id)
+        },
+        {
+            desc: 'Collection.$',
+            method: (db: TestDatabaseType) =>
+                (id: number, _emitUndefined = false) =>
+                    db.friends.where(':id').equals(id).$.pipe(map(x => x[0]))
+        },
+        {
+            desc: 'Table.$',
+            method: (db: TestDatabaseType) => (id: number, emitUndefined = false) => db.friends.$.pipe(
+                flatMap(x => {
+                    /**
+                     * The general method tests rely on returning undefined when not found.
+                     */
+                    const find = x.find(y => y.id === id || y.customId === id || (y.some && y.some.id === id));
+                    if (!find && !emitUndefined) { return EMPTY; }
+                    return of(find);
+                })
+            )
+        }
+    ];
 
 export const mockFriends = (count: number = 5): Friend[] => {
     const friend = () => ({

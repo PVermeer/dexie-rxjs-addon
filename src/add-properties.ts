@@ -2,19 +2,22 @@
 // tslint:disable: object-literal-shorthand
 import { IndexableType } from 'dexie';
 import { isEqual } from 'lodash';
-import { from, fromEventPattern } from 'rxjs';
-import { distinctUntilChanged, filter, flatMap, map, share, startWith, switchMap } from 'rxjs/operators';
-import Dexie from './types/augment-dexie';
+import { from, fromEventPattern, Observable } from 'rxjs';
+import { distinctUntilChanged, filter, flatMap, map, share, shareReplay, startWith, switchMap } from 'rxjs/operators';
+import DexieType from './types/augment-dexie';
 import { ICreateChange, IDatabaseChange, IUpdateChange } from './types/augment-dexie-observable-api';
 
 type ChangeCb = [IDatabaseChange[], boolean];
-type CollectionExtended = Dexie.Collection<any, any> & {
+type TableExtended = DexieType.Table<any, any> & {
+    _table$: Observable<any[]>;
+};
+type CollectionExtended = DexieType.Collection<any, any> & {
     _ctx: {
-        table: Dexie.Table<any, any>;
+        table: DexieType.Table<any, any>;
     }
 };
 
-export function addChanges$(db: Dexie) {
+export function addChanges$(db: DexieType) {
 
     Object.defineProperty(db, 'changes$', {
         value: fromEventPattern<ChangeCb>(handler => db.on('changes', handler)).pipe(
@@ -25,11 +28,11 @@ export function addChanges$(db: Dexie) {
 
 }
 
-export function addGet$(db: Dexie) {
+export function addGet$(db: DexieType) {
 
     Object.defineProperty(db.Table.prototype, 'get$', {
         value: function (
-            this: Dexie.Table<any, any>,
+            this: DexieType.Table<any, any>,
             key: IndexableType
         ) {
             return from(this.get(key)).pipe(
@@ -76,31 +79,32 @@ export function addGet$(db: Dexie) {
     });
 }
 
-export function addTable$(db: Dexie) {
+export function addTable$(db: DexieType) {
 
     Object.defineProperty(db.Table.prototype, '$', {
-        get: function (this: Dexie.Table<any, any>) {
-            return from(this.toArray()).pipe(
-                switchMap(original => db.changes$.pipe(
+        get: function (this: TableExtended) {
+            if (!this._table$) {
+
+                /**
+                 * Represents the current state of the table.
+                 * On first subscription (get $) emit fresh data then sub to changes.
+                 */
+                this._table$ = db.changes$.pipe(
                     filter(x => x.some(y => y.table === this.name)),
                     startWith([]),
-                    flatMap(async (_, i) => {
+                    flatMap(async () => this.toArray()),
+                    distinctUntilChanged(isEqual),
+                    shareReplay(),
+                );
 
-                        if (i === 0) { return original; }
-                        return this.toArray();
-
-                    })
-                )),
-                distinctUntilChanged(isEqual),
-                share()
-            );
+            }
+            return this._table$;
         }
-
     });
 
 }
 
-export function addWhere$(db: Dexie) {
+export function addWhere$(db: DexieType) {
 
     Object.defineProperty(db.Collection.prototype, '$', {
         get: function (this: CollectionExtended) {
@@ -126,7 +130,7 @@ export function addWhere$(db: Dexie) {
 
 // ========= Helper functions ==========
 function setPrimaryKey<T>(
-    primKey: Dexie.IndexSpec,
+    primKey: DexieType.IndexSpec,
     object: T & object,
     value: IndexableType
 ): T {

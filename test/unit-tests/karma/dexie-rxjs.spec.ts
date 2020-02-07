@@ -53,7 +53,8 @@ describe('Rxjs', () => {
                 });
             });
             describe('Methods', () => {
-                methods.forEach(method => {
+                methods.forEach((method, _j) => {
+                    // if (_j !== 2) { return; }
                     let friend: Friend;
                     let id: number;
                     let updateId: number;
@@ -148,7 +149,7 @@ describe('Rxjs', () => {
                             let emitCount = 0;
                             let obsFriend: Friend | undefined;
                             const emitPromise = new Promise(resolve => {
-                                subs.add(method$(id).subscribe(
+                                subs.add(method$(id, true).subscribe(
                                     friendEmit => {
                                         emitCount++;
                                         obsFriend = friendEmit;
@@ -158,6 +159,7 @@ describe('Rxjs', () => {
                             });
                             await db.friends.update(updateId, { firstName: 'TestieUpdate' });
                             await emitPromise;
+                            expect(emitCount).toBe(2);
                             expect(obsFriend).toEqual({ ...friend, firstName: 'TestieUpdate' });
                         });
                         it('should emit undefined on record delete', async () => {
@@ -165,7 +167,7 @@ describe('Rxjs', () => {
                             let obsFriend: Friend | undefined;
 
                             const waits = new Array(2).fill(null).map(() => flatPromise());
-                            subs.add(method$(id).subscribe(
+                            subs.add(method$(id, true).subscribe(
                                 friendEmit => {
                                     emitCount++;
                                     obsFriend = friendEmit;
@@ -176,16 +178,18 @@ describe('Rxjs', () => {
                                 }));
 
                             await waits[0].promise;
+                            expect(emitCount).toBe(1);
                             expect(obsFriend).toEqual(friend);
                             await db.friends.delete(updateId);
                             await waits[1].promise;
+                            expect(emitCount).toBe(2);
                             expect(obsFriend).toBe(undefined);
                         });
                         it('should emit undefined when id is not found', async () => {
                             let emitCount = 0;
                             let obsFriend: Friend | undefined;
                             const emitPromise = new Promise(resolve => {
-                                subs.add(method$(99999999).subscribe(
+                                subs.add(method$(99999999, true).subscribe(
                                     friendEmit => {
                                         emitCount++;
                                         obsFriend = friendEmit;
@@ -205,7 +209,8 @@ describe('Rxjs', () => {
                                     database.desc === 'TestDatabaseCustomKey' ||
                                         (database.desc === 'TestDatabaseNoKey' && method.desc === 'Table.$') ?
                                         friends[12].customId :
-                                        13
+                                        13,
+                                    true
                                 ).subscribe(
                                     friendEmit => {
                                         emitCount++;
