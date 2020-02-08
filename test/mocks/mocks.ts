@@ -101,24 +101,32 @@ export const databasesNegative = [
     }
 ];
 
+interface MethodOptions {
+    emitUndefined?: boolean;
+    emitFull?: boolean;
+}
 export const methods: {
     desc: string,
-    method: (db: TestDatabaseType) => (id: number, emitUndefined?: boolean) => Observable<Friend>
+    method: (db: TestDatabaseType) =>
+        (id: number, options?: MethodOptions) => Observable<Friend | Friend[]>
 }[] = [
         {
             desc: 'Table.get$()',
-            method: (db: TestDatabaseType) => (id: number) => db.friends.get$(id)
+            method: db => id => db.friends.get$(id)
         },
         {
             desc: 'Collection.$',
-            method: (db: TestDatabaseType) =>
-                (id: number, _emitUndefined = false) =>
-                    db.friends.where(':id').equals(id).$.pipe(map(x => x[0]))
+            method: (db: TestDatabaseType) => (id, { emitFull } = { emitFull: false }) =>
+                db.friends.where(':id').equals(id).$.pipe(map(x => emitFull ? x : x[0]))
         },
         {
             desc: 'Table.$',
-            method: (db: TestDatabaseType) => (id: number, emitUndefined = false) => db.friends.$.pipe(
+            method: (db: TestDatabaseType) => (
+                id,
+                { emitUndefined, emitFull } = { emitUndefined: false, emitFull: false }
+            ) => db.friends.$.pipe(
                 flatMap(x => {
+                    if (emitFull) { return of(x); }
                     /**
                      * The general method tests rely on returning undefined when not found.
                      */

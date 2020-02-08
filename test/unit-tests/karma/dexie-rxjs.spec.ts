@@ -105,15 +105,15 @@ describe('Rxjs', () => {
                             expect(getOldFriend).toEqual(friend);
                         });
                         it('should emit with auto key (++id)', async () => {
-                            const getFriend = await obs$.pipe(take(1)).toPromise();
+                            const getFriend = await obs$.pipe(take(1)).toPromise() as Friend;
 
                             const [newFriend] = mockFriends(1);
                             const newId = await addFriend(newFriend);
                             const obsNew$ = method$(newId);
-                            const getNewFriend = await obsNew$.pipe(take(1)).toPromise();
+                            const getNewFriend = await obsNew$.pipe(take(1)).toPromise() as Friend;
 
                             const obsOld$ = method$(id);
-                            const getOldFriend = await obsOld$.pipe(take(1)).toPromise();
+                            const getOldFriend = await obsOld$.pipe(take(1)).toPromise() as Friend;
 
                             switch (database.desc) {
                                 case 'TestDatabaseKeyPath': {
@@ -149,10 +149,10 @@ describe('Rxjs', () => {
                             let emitCount = 0;
                             let obsFriend: Friend | undefined;
                             const emitPromise = new Promise(resolve => {
-                                subs.add(method$(id, true).subscribe(
+                                subs.add(method$(id, { emitUndefined: true }).subscribe(
                                     friendEmit => {
                                         emitCount++;
-                                        obsFriend = friendEmit;
+                                        obsFriend = friendEmit as Friend;
                                         if (emitCount === 2) { resolve(); }
                                     }
                                 ));
@@ -167,10 +167,10 @@ describe('Rxjs', () => {
                             let obsFriend: Friend | undefined;
 
                             const waits = new Array(2).fill(null).map(() => flatPromise());
-                            subs.add(method$(id, true).subscribe(
+                            subs.add(method$(id, { emitUndefined: true }).subscribe(
                                 friendEmit => {
                                     emitCount++;
-                                    obsFriend = friendEmit;
+                                    obsFriend = friendEmit as Friend;
                                     switch (emitCount) {
                                         case 1: waits[0].resolve(); break;
                                         case 2: waits[1].resolve(); break;
@@ -189,10 +189,10 @@ describe('Rxjs', () => {
                             let emitCount = 0;
                             let obsFriend: Friend | undefined;
                             const emitPromise = new Promise(resolve => {
-                                subs.add(method$(99999999, true).subscribe(
+                                subs.add(method$(99999999, { emitUndefined: true }).subscribe(
                                     friendEmit => {
                                         emitCount++;
-                                        obsFriend = friendEmit;
+                                        obsFriend = friendEmit as Friend;
                                         if (emitCount === 1) { resolve(); }
                                     }
                                 ));
@@ -210,11 +210,11 @@ describe('Rxjs', () => {
                                         (database.desc === 'TestDatabaseNoKey' && method.desc === 'Table.$') ?
                                         friends[12].customId :
                                         13,
-                                    true
+                                    { emitUndefined: true }
                                 ).subscribe(
                                     friendEmit => {
                                         emitCount++;
-                                        obsFriend = friendEmit;
+                                        obsFriend = friendEmit as Friend;
                                         if (emitCount === 2) { resolve(); }
                                     }
                                 ));
@@ -224,151 +224,172 @@ describe('Rxjs', () => {
                             await emitPromise;
                             expect(obsFriend).toEqual(friends[index]);
                         });
-                        // Specific test per method
-                        switch (method.desc) {
-                            case 'Table.$': {
-                                it('should be an array', async () => {
-                                    const table = await db.friends.$.pipe(take(1)).toPromise();
-                                    expect(table).toEqual([friend]);
-                                });
-                                it('should emit on adding/removing to the table', async () => {
-                                    const table$ = db.friends.$;
-                                    let table: Friend[];
-                                    let emitCount = 0;
-                                    const waits = new Array(3).fill(null).map(() => flatPromise());
-                                    subs.add(table$.subscribe(emit => {
-                                        table = emit;
-                                        emitCount++;
-                                        switch (emitCount) {
-                                            case 1: waits[0].resolve(); break;
-                                            case 2: waits[1].resolve(); break;
-                                            case 3: waits[2].resolve(); break;
-                                        }
-                                    }));
+                        it('should not emit when no changes', async () => {
+                            const friends = mockFriends(50);
+                            const updateFriends = [...friends.map(x => {
+                                const { customId, ...rest } = x;
+                                return rest;
+                            })];
+                            const ids = await Promise.all(friends.map(x => addFriend(x)));
+                            const lastId = updateId;
+                            const updateIds = friends.map((x, i) =>
+                                database.desc !== 'TestDatabaseCustomKey' && ids[i] > 1000000 ?
+                                    lastId + i + 1 :
+                                    ids[i]
+                            );
 
-                                    await waits[0].promise;
-                                    expect(emitCount).toBe(1);
-                                    expect(table!).toEqual([friend]);
+                            const idx1 = faker.random.number({ min: 0, max: 9 });
+                            const id1 = ids[idx1];
+                            const updateId1 = updateIds[idx1];
+                            let emitCount = 0;
 
-                                    const friends = mockFriends(9);
-                                    await Promise.all(friends.map(x => db.friends.add(x)));
-                                    await waits[1].promise;
-                                    expect(emitCount).toBe(2);
-                                    expect(table!).toEqual(jasmine.arrayContaining([
-                                        friend,
-                                        ...friends.map(x => jasmine.objectContaining(x))
-                                    ]));
-                                    expect(table!.length).toBe(10);
+                            const waits = new Array(4).fill(null).map(() => flatPromise());
+                            subs.add(method$(id1).subscribe(
+                                () => {
+                                    emitCount++;
+                                    switch (emitCount) {
+                                        case 1:
+                                            waits[0].resolve();
+                                            break;
+                                        case 2:
+                                            waits[1].resolve();
+                                            waits[2].resolve();
+                                            waits[3].resolve();
+                                            break;
+                                    }
+                                }
+                            ));
+                            // First emit
+                            await waits[0].promise;
+                            expect(emitCount).toBe(1);
 
-                                    await db.friends.delete(updateId);
-                                    await waits[2].promise;
-                                    expect(emitCount).toBe(3);
-                                    expect(table!).toEqual(jasmine.arrayContaining(
-                                        friends.map(x => jasmine.objectContaining(x))
-                                    ));
-                                    expect(table!.length).toBe(9);
-                                });
-                                it('should emit on updating a record on the table', async () => {
-                                    const table$ = db.friends.$;
-                                    let table: Friend[];
-                                    let emitCount = 0;
-                                    const waits = new Array(2).fill(null).map(() => flatPromise());
-                                    subs.add(table$.subscribe(emit => {
-                                        table = emit;
-                                        emitCount++;
-                                        switch (emitCount) {
-                                            case 1: waits[0].resolve(); break;
-                                            case 2: waits[1].resolve(); break;
-                                        }
-                                    }));
+                            // Update different record
+                            const idx2 = faker.random.number({ min: 10, max: 19 });
+                            const updateId2 = updateIds[idx2];
+                            await db.friends.update(updateId2, updateFriends[idx2]);
+                            setTimeout(() => waits[1].resolve(), 500);
+                            await waits[1].promise;
+                            expect(emitCount).toBe(1);
 
-                                    await waits[0].promise;
-                                    expect(emitCount).toBe(1);
-                                    expect(table!).toEqual([friend]);
+                            // Update record with same data
+                            await db.friends.update(updateId1, updateFriends[idx1]);
+                            setTimeout(() => waits[2].resolve(), 500);
+                            await waits[2].promise;
+                            expect(emitCount).toBe(1);
 
-                                    await db.friends.update(updateId, { lastName: 'TestieTest' });
-                                    await waits[1].promise;
-                                    expect(emitCount).toBe(2);
-                                    expect(table!).toEqual([{ ...friend, lastName: 'TestieTest' }]);
-                                });
-                                it('should not emit on updating a record on the table with same data', async () => {
-                                    const table$ = db.friends.$;
-                                    let table: Friend[];
-                                    let emitCount = 0;
-                                    const waits = new Array(2).fill(null).map(() => flatPromise());
-                                    subs.add(table$.subscribe(emit => {
-                                        table = emit;
-                                        emitCount++;
-                                        switch (emitCount) {
-                                            case 1: waits[0].resolve(); break;
-                                            case 2: waits[1].resolve(); break;
-                                        }
-                                    }));
+                            // Update record with different data
+                            await db.friends.update(updateId1, updateFriends[49]);
+                            await waits[3].promise;
+                            expect(emitCount).toBe(2);
+                        });
 
-                                    await waits[0].promise;
-                                    expect(table!).toEqual([friend]);
+                        // ======= Specific tests per method =========
 
-                                    await db.friends.update(updateId, { lastName: friend.lastName });
-                                    setTimeout(() => waits[1].resolve(), 500);
-                                    await waits[1].promise;
-                                    expect(emitCount).toBe(1);
-                                    expect(table!).toEqual([friend]);
-                                });
-                                break;
-                            }
-                            default: {
-                                it('should not emit when no changes', async () => {
-                                    const friends = mockFriends(50);
-                                    const updateFriends = [...friends.map(x => {
-                                        const { customId, ...rest } = x;
-                                        return rest;
-                                    })];
-                                    const ids = await Promise.all(friends.map(x => addFriend(x)));
+                        if (['Table.$', 'Collection.$'].includes(method.desc)) {
+                            it('should be the same Observable instance from getter', () => {
+                                let a: Observable<any>;
+                                let b: Observable<any>;
+                                switch (method.desc) {
+                                    case 'Table.$': a = db.friends.$; b = db.friends.$; break;
+                                    case 'Collection.$': {
+                                        const collection = db.friends.where(':id').equals(id);
+                                        a = collection.$;
+                                        b = collection.$;
+                                        break;
+                                    }
+                                }
+                                expect(a === b).toBeTrue();
+                            });
+                            it('should be an array', async () => {
+                                const getObs$ = method$(id, { emitFull: true });
+                                const collection = await getObs$.pipe(take(1)).toPromise();
+                                expect(collection).toEqual([friend]);
+                            });
+                            it('should emit on updating a record on the table', async () => {
+                                const collection$ = method$(id, { emitFull: true });
+                                let collection: Friend[];
+                                let emitCount = 0;
+                                const waits = new Array(2).fill(null).map(() => flatPromise());
+                                subs.add(collection$.subscribe(emit => {
+                                    collection = emit as Friend[];
+                                    emitCount++;
+                                    switch (emitCount) {
+                                        case 1: waits[0].resolve(); break;
+                                        case 2: waits[1].resolve(); break;
+                                    }
+                                }));
 
-                                    const idx1 = faker.random.number({ min: 0, max: 9 });
-                                    const id1 = ids[idx1];
-                                    let emitCount = 0;
+                                await waits[0].promise;
+                                expect(emitCount).toBe(1);
+                                expect(collection!).toEqual([friend]);
 
-                                    const waits = new Array(4).fill(null).map(() => flatPromise());
-                                    subs.add(method$(id1).subscribe(
-                                        () => {
-                                            emitCount++;
-                                            switch (emitCount) {
-                                                case 1:
-                                                    waits[0].resolve();
-                                                    break;
-                                                case 2:
-                                                    waits[1].resolve();
-                                                    waits[2].resolve();
-                                                    waits[3].resolve();
-                                                    break;
-                                            }
-                                        }
-                                    ));
-                                    // First emit
-                                    await waits[0].promise;
-                                    expect(emitCount).toBe(1);
+                                await db.friends.update(updateId, { lastName: 'TestieTest' });
+                                await waits[1].promise;
+                                expect(emitCount).toBe(2);
+                                expect(collection!).toEqual([{ ...friend, lastName: 'TestieTest' }]);
+                            });
+                            it('should not emit on updating a record on the table with same data', async () => {
+                                const collection$ = method$(id, { emitFull: true });
+                                let collection: Friend[];
+                                let emitCount = 0;
+                                const waits = new Array(2).fill(null).map(() => flatPromise());
+                                subs.add(collection$.subscribe(emit => {
+                                    collection = emit as Friend[];
+                                    emitCount++;
+                                    switch (emitCount) {
+                                        case 1: waits[0].resolve(); break;
+                                        case 2: waits[1].resolve(); break;
+                                    }
+                                }));
 
-                                    // Update different record
-                                    const idx2 = faker.random.number({ min: 10, max: 19 });
-                                    const id2 = ids[idx2];
-                                    await db.friends.update(id2, updateFriends[idx2]);
-                                    setTimeout(() => waits[1].resolve(), 500);
-                                    await waits[1].promise;
-                                    expect(emitCount).toBe(1);
+                                await waits[0].promise;
+                                expect(collection!).toEqual([friend]);
 
-                                    // Update record with same data
-                                    await db.friends.update(id1, updateFriends[idx1]);
-                                    setTimeout(() => waits[2].resolve(), 500);
-                                    await waits[2].promise;
-                                    expect(emitCount).toBe(1);
+                                await db.friends.update(updateId, { lastName: friend.lastName });
+                                setTimeout(() => waits[1].resolve(), 500);
+                                await waits[1].promise;
+                                expect(emitCount).toBe(1);
+                                expect(collection!).toEqual([friend]);
+                            });
+                        }
+                        if (['Table.$'].includes(method.desc)) {
+                            it('should emit on adding/removing to the table', async () => {
+                                const getObs$ = method$(id, { emitFull: true });
+                                let collection: Friend[];
+                                let emitCount = 0;
+                                const waits = new Array(3).fill(null).map(() => flatPromise());
+                                subs.add(getObs$.subscribe(emit => {
+                                    collection = emit as Friend[];
+                                    emitCount++;
+                                    switch (emitCount) {
+                                        case 1: waits[0].resolve(); break;
+                                        case 2: waits[1].resolve(); break;
+                                        case 3: waits[2].resolve(); break;
+                                    }
+                                }));
 
-                                    // Update record with different data
-                                    await db.friends.update(id1, updateFriends[49]);
-                                    await waits[3].promise;
-                                    expect(emitCount).toBe(2);
-                                });
-                            }
+                                await waits[0].promise;
+                                expect(emitCount).toBe(1);
+                                expect(collection!).toEqual([friend]);
+
+                                const friends = mockFriends(9);
+                                await Promise.all(friends.map(x => db.friends.add(x)));
+                                await waits[1].promise;
+                                expect(emitCount).toBe(2);
+                                expect(collection!).toEqual(jasmine.arrayContaining([
+                                    friend,
+                                    ...friends.map(x => jasmine.objectContaining(x))
+                                ]));
+                                expect(collection!.length).toBe(10);
+
+                                await db.friends.delete(updateId);
+                                await waits[2].promise;
+                                expect(emitCount).toBe(3);
+                                expect(collection!).toEqual(jasmine.arrayContaining(
+                                    friends.map(x => jasmine.objectContaining(x))
+                                ));
+                                expect(collection!.length).toBe(9);
+                            });
                         }
                     });
                 });
