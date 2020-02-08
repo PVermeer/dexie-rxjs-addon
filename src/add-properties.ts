@@ -14,7 +14,8 @@ type TableExtended = DexieType.Table<any, any> & {
 type CollectionExtended = DexieType.Collection<any, any> & {
     _ctx: {
         table: DexieType.Table<any, any>;
-    }
+    };
+    _collection$: Observable<any>;
 };
 
 export function addChanges$(db: DexieType) {
@@ -108,20 +109,22 @@ export function addWhere$(db: DexieType) {
 
     Object.defineProperty(db.Collection.prototype, '$', {
         get: function (this: CollectionExtended) {
-            return from(this.toArray()).pipe(
-                switchMap(original => db.changes$.pipe(
+            if (!this._collection$) {
+
+                /**
+                 * Represents the current state of the collection.
+                 * On first subscription (get $) emit fresh data then sub to changes.
+                 */
+                this._collection$ = db.changes$.pipe(
                     filter(x => x.some(y => y.table === this._ctx.table.name)),
                     startWith([]),
-                    flatMap(async (_, i) => {
+                    flatMap(async () => this.toArray()),
+                    distinctUntilChanged(isEqual),
+                    shareReplay()
+                );
 
-                        if (i === 0) { return original; }
-                        return this.toArray();
-
-                    })
-                )),
-                distinctUntilChanged(isEqual),
-                share()
-            );
+            }
+            return this._collection$;
         }
 
     });
