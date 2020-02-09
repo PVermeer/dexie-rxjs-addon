@@ -1,3 +1,10 @@
+# [1.0.0-beta.2](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2020-02-09)
+
+
+### Bug Fixes
+
+* **typings:** typing now works ([f8f6253](https://github.com/PVermeer/dexie-rxjs-addon/commit/f8f625370096afb7e29cfacfb82809bbe852ff02))
+
 # 1.0.0-beta.1 (2020-02-08)
 
 
