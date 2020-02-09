@@ -38,9 +38,13 @@ const configLib = {
 
     packageName: packageName(packageJson.name),
 
+    packageScopeAndName: packageJson.name,
+
     umdName: umdName(packageJson.name),
 
     version: packageJson.version,
+
+    dependencies: Object.keys(packageJson.dependencies),
 
     peerDependencies: Object.keys(packageJson.peerDependencies),
 

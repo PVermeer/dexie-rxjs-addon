@@ -22,6 +22,7 @@
       "node_modules/@types",
       "src/types"
     ],
+    "stripInternal": true,
     "lib": [
       "es2018",
       "dom"

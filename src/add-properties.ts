@@ -1,24 +1,24 @@
 // tslint:disable: space-before-function-paren
 // tslint:disable: object-literal-shorthand
-import { IndexableType } from 'dexie';
+import { Dexie, IndexableType } from 'dexie';
+import { ICreateChange, IDatabaseChange, IUpdateChange } from 'dexie-observable/api';
 import { isEqual } from 'lodash';
 import { from, fromEventPattern, Observable } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, map, share, shareReplay, startWith, switchMap } from 'rxjs/operators';
-import DexieType from './types/augment-dexie';
-import { ICreateChange, IDatabaseChange, IUpdateChange } from './types/augment-dexie-observable-api';
 
 type ChangeCb = [IDatabaseChange[], boolean];
-type TableExtended = DexieType.Table<any, any> & {
+type TableExtended = Dexie.Table<any, any> & {
     _table$: Observable<any[]>;
 };
-type CollectionExtended = DexieType.Collection<any, any> & {
+type CollectionExtended = Dexie.Collection<any, any> & {
     _ctx: {
-        table: DexieType.Table<any, any>;
+        table: Dexie.Table<any, any>;
     };
     _collection$: Observable<any>;
 };
 
-export function addChanges$(db: DexieType) {
+/** @internal */
+export function addChanges$(db: Dexie) {
 
     Object.defineProperty(db, 'changes$', {
         value: fromEventPattern<ChangeCb>(handler => db.on('changes', handler)).pipe(
@@ -29,11 +29,12 @@ export function addChanges$(db: DexieType) {
 
 }
 
-export function addGet$(db: DexieType) {
+/** @internal */
+export function addGet$(db: Dexie) {
 
     Object.defineProperty(db.Table.prototype, 'get$', {
         value: function (
-            this: DexieType.Table<any, any>,
+            this: TableExtended,
             key: IndexableType
         ) {
             return from(this.get(key)).pipe(
@@ -80,7 +81,8 @@ export function addGet$(db: DexieType) {
     });
 }
 
-export function addTable$(db: DexieType) {
+/** @internal */
+export function addTable$(db: Dexie) {
 
     Object.defineProperty(db.Table.prototype, '$', {
         get: function (this: TableExtended) {
@@ -105,7 +107,8 @@ export function addTable$(db: DexieType) {
 
 }
 
-export function addWhere$(db: DexieType) {
+/** @internal */
+export function addWhere$(db: Dexie) {
 
     Object.defineProperty(db.Collection.prototype, '$', {
         get: function (this: CollectionExtended) {
@@ -132,8 +135,9 @@ export function addWhere$(db: DexieType) {
 
 
 // ========= Helper functions ==========
+/** @internal */
 function setPrimaryKey<T>(
-    primKey: DexieType.IndexSpec,
+    primKey: Dexie.IndexSpec,
     object: T & object,
     value: IndexableType
 ): T {
