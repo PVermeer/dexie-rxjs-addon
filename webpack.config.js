@@ -27,7 +27,10 @@ const umdConfig = {
             loader: 'ts-loader',
             exclude: /node_modules/,
             options: {
-                configFile: '../src/tsconfig.json'
+                configFile: '../src/tsconfig.json',
+                compilerOptions: {
+                    declaration: true
+                }
             }
         }]
     },
