@@ -46,15 +46,17 @@ declare module 'dexie-observable/api' {
 
 export function dexieRxjs(db: Dexie) {
 
-    db.on('ready', () => {
+    function checkSchema() {
         const unSupported = db.tables.some(table =>
-            [table.schema.primKey, ...table.schema.indexes].some(index => index.compound || index.multi)
-            , false);
+            [table.schema.primKey, ...table.schema.indexes].some(index => index.compound || index.multi));
 
         if (unSupported) {
-            throw new Error('Compound or multi indices are not (yet) supported');
+            throw new Error('Compound or multi indices are not (yet) supported in combination with Dexie RxJs Addon');
         }
-    });
+    }
+    db.on('populate', checkSchema);
+    db.on('versionchange', checkSchema);
+    db.on('ready', checkSchema);
 
     addChanges$(db);
     addGet$(db);

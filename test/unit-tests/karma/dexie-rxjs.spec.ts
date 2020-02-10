@@ -406,7 +406,7 @@ describe('Rxjs', () => {
                 await db.delete();
             });
             it('should throw when compound / multi index is used', async () => {
-                await expectAsync(db.open()).toBeRejectedWithError('Compound or multi indices are not (yet) supported');
+                await expectAsync(db.open()).toBeRejectedWithError('Compound or multi indices are not (yet) supported in combination with Dexie RxJs Addon');
                 expect(db.isOpen()).toBeFalse();
             });
         });

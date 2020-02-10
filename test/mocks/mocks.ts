@@ -25,6 +25,7 @@ export const databasesPositive = [
             constructor(name: string) {
                 super(name);
                 dexieRxjs(this);
+                this.on('blocked', () => false);
                 this.version(1).stores({
                     friends: '++id, customId, firstName, lastName, shoeSize, age'
                 });
@@ -38,6 +39,7 @@ export const databasesPositive = [
             constructor(name: string) {
                 super(name);
                 dexieRxjs(this);
+                this.on('blocked', () => false);
                 this.version(1).stores({
                     friends: '++some.id, customId, firstName, lastName, shoeSize, age'
                 });
@@ -51,6 +53,7 @@ export const databasesPositive = [
             constructor(name: string) {
                 super(name);
                 dexieRxjs(this);
+                this.on('blocked', () => false);
                 this.version(1).stores({
                     friends: 'customId, firstName, lastName, shoeSize, age'
                 });
@@ -64,6 +67,7 @@ export const databasesPositive = [
             constructor(name: string) {
                 super(name);
                 dexieRxjs(this);
+                this.on('blocked', () => false);
                 this.version(1).stores({
                     friends: '++, customId, firstName, lastName, shoeSize, age'
                 });
@@ -80,6 +84,7 @@ export const databasesNegative = [
             constructor(name: string) {
                 super(name);
                 dexieRxjs(this);
+                this.on('blocked', () => false);
                 this.version(1).stores({
                     friends: '++id, firstName, lastName, [firstName+lastName], shoeSize, age'
                 });
@@ -93,6 +98,7 @@ export const databasesNegative = [
             constructor(name: string) {
                 super(name);
                 dexieRxjs(this);
+                this.on('blocked', () => false);
                 this.version(1).stores({
                     friends: '++id, multi*, firstName, lastName, shoeSize, age'
                 });
