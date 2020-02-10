@@ -46,6 +46,13 @@ declare module 'dexie-observable/api' {
 
 export function dexieRxjs(db: Dexie) {
 
+    // Register addon
+    const dbExtended: DexieExtended = db;
+    dbExtended.pVermeerAddonsRegistered = {
+        ...dbExtended.pVermeerAddonsRegistered,
+        rxjs: true
+    };
+
     function checkSchema() {
         const unSupported = db.tables.some(table =>
             [table.schema.primKey, ...table.schema.indexes].some(index => index.compound || index.multi));
