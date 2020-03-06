@@ -232,7 +232,7 @@ describe('Rxjs', () => {
                             })];
                             const ids = await Promise.all(friends.map(x => addFriend(x)));
                             const lastId = updateId;
-                            const updateIds = friends.map((x, i) =>
+                            const updateIds = friends.map((_, i) =>
                                 database.desc !== 'TestDatabaseCustomKey' && ids[i] > 1000000 ?
                                     lastId + i + 1 :
                                     ids[i]
@@ -287,8 +287,8 @@ describe('Rxjs', () => {
 
                         if (['Table.$', 'Collection.$'].includes(method.desc)) {
                             it('should be the same Observable instance from getter', () => {
-                                let a: Observable<any>;
-                                let b: Observable<any>;
+                                let a: Observable<any> | undefined;
+                                let b: Observable<any> | undefined;
                                 switch (method.desc) {
                                     case 'Table.$': a = db.friends.$; b = db.friends.$; break;
                                     case 'Collection.$': {
@@ -298,7 +298,8 @@ describe('Rxjs', () => {
                                         break;
                                     }
                                 }
-                                expect(a === b).toBeTrue();
+                                expect(a).toBeTruthy();
+                                expect(a).toBe(b);
                             });
                             it('should be an array', async () => {
                                 const getObs$ = method$(id, { emitFull: true });
