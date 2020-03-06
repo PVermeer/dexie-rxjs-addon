@@ -80,7 +80,7 @@ function karmaConfig(config) {
         autoWatch: true,
         singleRun: false,
         restartOnFileChange: true
-    }
+    };
 }
 
 module.exports = function (config) {

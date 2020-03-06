@@ -24,7 +24,7 @@
     ],
     "stripInternal": true,
     "lib": [
-      "es2018",
+      "ESNext",
       "dom"
     ],
     "strict": true,
@@ -36,11 +36,5 @@
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true
-  },
-  "files": [
-    "src/index.ts"
-  ],
-  "include": [
-    "src/types"
-  ]
+  }
 }
