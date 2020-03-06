@@ -1,9 +1,12 @@
-// tslint:disable: unified-signatures
 import { Dexie } from 'dexie';
 import 'dexie-observable';
 import { IDatabaseChange } from 'dexie-observable/api';
 import { Observable } from 'rxjs';
 import { addChanges$, addGet$, addTable$, addWhere$ } from './add-properties';
+
+type DexieExtended = Dexie & {
+    pVermeerAddonsRegistered?: { [addon: string]: boolean }
+};
 
 declare module 'dexie' {
     interface Dexie {
@@ -17,11 +20,13 @@ declare module 'dexie' {
         interface Table<T, Key> {
             /**
              * Get a full table as an RxJs observable and observe changes.
+             *
              * Uses Table.toArray().
              */
             $: Observable<T[]>;
             /**
              * Get a single record as an RxJs observable and observe changes.
+             *
              * Uses Table.get().
              * @param key Primary key to find.
              */
@@ -30,6 +35,7 @@ declare module 'dexie' {
         interface Collection<T, Key> {
             /**
              * Get a collection (Table.where()) as an RxJs observable and observe changes.
+             *
              * Uses Collection.toArray().
              */
             $: Observable<T[]>;

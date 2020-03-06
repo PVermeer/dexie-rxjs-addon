@@ -129,21 +129,24 @@ The packet exposes new methods and properties on Dexie classes:
 
     interface Table<T, Key> {
         /**
+         * Get a full table as an RxJs observable and observe changes.
+         *
+         * Uses Table.toArray().
+         */
+        $: Observable<T[]>;
+        /**
          * Get a single record as an RxJs observable and observe changes.
+         *
          * Uses Table.get().
          * @param key Primary key to find.
          */
         get$(key: Key): Observable<T | undefined>;
-        /**
-         * Get a full table as an RxJs observable and observe changes.
-         * Uses Table.toArray().
-         */
-        $: Observable<T[]>;
     }
 
     interface Collection<T, Key> {
         /**
          * Get a collection (Table.where()) as an RxJs observable and observe changes.
+         *
          * Uses Collection.toArray().
          */
         $: Observable<T[]>;

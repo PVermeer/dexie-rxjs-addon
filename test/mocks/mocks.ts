@@ -121,11 +121,6 @@ export const methods: {
             method: db => id => db.friends.get$(id)
         },
         {
-            desc: 'Collection.$',
-            method: (db: TestDatabaseType) => (id, { emitFull } = { emitFull: false }) =>
-                db.friends.where(':id').equals(id).$.pipe(map(x => emitFull ? x : x[0]))
-        },
-        {
             desc: 'Table.$',
             method: (db: TestDatabaseType) => (
                 id,
@@ -133,14 +128,17 @@ export const methods: {
             ) => db.friends.$.pipe(
                 flatMap(x => {
                     if (emitFull) { return of(x); }
-                    /**
-                     * The general method tests rely on returning undefined when not found.
-                     */
+                    /** The general method tests rely on returning undefined when not found. */
                     const find = x.find(y => y.id === id || y.customId === id || (y.some && y.some.id === id));
                     if (!find && !emitUndefined) { return EMPTY; }
                     return of(find);
                 })
             )
+        },
+        {
+            desc: 'Collection.$',
+            method: (db: TestDatabaseType) => (id, { emitFull } = { emitFull: false }) =>
+                db.friends.where(':id').equals(id).$.pipe(map(x => emitFull ? x : x[0]))
         }
     ];
 
