@@ -1,6 +1,6 @@
 // tslint:disable: space-before-function-paren
 // tslint:disable: object-literal-shorthand
-import { Dexie, IndexableType } from 'dexie';
+import { Dexie, IndexableType, IndexSpec } from 'dexie';
 import { ICreateChange, IDatabaseChange, IUpdateChange } from 'dexie-observable/api';
 import { isEqual } from 'lodash';
 import { from, fromEventPattern, Observable } from 'rxjs';
@@ -137,7 +137,7 @@ export function addWhere$(db: Dexie) {
 // ========= Helper functions ==========
 /** @internal */
 function setPrimaryKey<T>(
-    primKey: Dexie.IndexSpec,
+    primKey: IndexSpec,
     object: T & object,
     value: IndexableType
 ): T {

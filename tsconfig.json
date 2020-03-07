@@ -8,6 +8,11 @@
       "./",
       "types"
     ],
+    "paths": {
+      "dexie-observable": [
+        "src/types/dexie-observable"
+      ]
+    },
     "outDir": "./dist",
     "sourceMap": false,
     "declaration": false,
@@ -19,8 +24,7 @@
     "importHelpers": true,
     "target": "ES5",
     "typeRoots": [
-      "node_modules/@types",
-      "src/types"
+      "node_modules/@types"
     ],
     "stripInternal": true,
     "lib": [
