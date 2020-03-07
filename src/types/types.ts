@@ -1,10 +1,13 @@
-import Dexie from 'dexie';
+import Dexie, { Collection, KeyRange, Table, TableSchema, Transaction, WhereClause } from 'dexie';
 import { IDatabaseChange } from 'dexie-observable/api';
 import { Observable } from 'rxjs';
+import { TableExtended } from '../tableExt.class';
 
-export type DexieExtended = Dexie & {
-    pVermeerAddonsRegistered?: { [addon: string]: boolean }
-};
+export interface DexieExtended extends Dexie {
+    pVermeerAddonsRegistered?: { [addon: string]: boolean };
+    Table: new <T, TKey>(name: string, tableSchema: TableSchema, optionalTrans?: Transaction) => Table<T, TKey>;
+    Collection: new <T, TKey>(whereClause?: WhereClause | null, keyRangeGenerator?: () => KeyRange) => Collection<T, TKey>;
+}
 
 declare module 'dexie' {
     interface Dexie {
@@ -14,29 +17,7 @@ declare module 'dexie' {
          */
         changes$: Observable<IDatabaseChange[]>;
     }
-    interface Table<T, TKey> {
-        /**
-         * Get a full table as an RxJs observable and observe changes.
-         *
-         * Uses Table.toArray().
-         */
-        $: Observable<T[]>;
-        /**
-         * Get a single record as an RxJs observable and observe changes.
-         *
-         * Uses Table.get().
-         * @param key Primary key to find.
-         */
-        get$(key: Key): Observable<T | undefined>;
-    }
-    interface Collection<T, TKey> {
-        /**
-         * Get a collection (Table.where()) as an RxJs observable and observe changes.
-         *
-         * Uses Collection.toArray().
-         */
-        $: Observable<T[]>;
-    }
+    interface Table<T, TKey> extends TableExtended<T, TKey> { }
 }
 
 declare module 'dexie-observable/api' {

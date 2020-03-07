@@ -113,13 +113,13 @@ interface MethodOptions {
 }
 export const methods = [
     {
-        desc: 'Table.get$()',
-        method: (db: TestDatabaseType) => (id: number, _options?: MethodOptions) => db.friends.get$(id)
+        desc: 'get()',
+        method: (db: TestDatabaseType) => (id: number, _options?: MethodOptions) => db.friends.$.get(id)
     },
     {
-        desc: 'Table.$',
+        desc: 'toArray()',
         method: (db: TestDatabaseType) => (id: number, _options: MethodOptions = { emitUndefined: false, emitFull: false }
-        ) => db.friends.$.pipe(
+        ) => db.friends.$.toArray().pipe(
             flatMap(x => {
                 if (_options.emitFull) { return of(x); }
                 /** The general method tests rely on returning undefined when not found. */
@@ -130,9 +130,9 @@ export const methods = [
         )
     },
     {
-        desc: 'Collection.$',
+        desc: 'where()',
         method: (db: TestDatabaseType) => (id: number, _options: MethodOptions = { emitFull: false }) =>
-            db.friends.where(':id').equals(id).$.pipe(map(x => _options.emitFull ? x : x[0]))
+            db.friends.$.where(':id').equals(id).toArray().pipe(map(x => _options.emitFull ? x : x[0]))
     }
 ];
 

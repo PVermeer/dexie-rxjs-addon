@@ -64,7 +64,7 @@ describe('Rxjs', () => {
                     const addFriend = (friendToAdd: Friend) => db.friends.add(friendToAdd)
                         .then(newId => {
                             switch (database.desc) {
-                                case 'TestDatabaseNoKey': return method.desc === 'Table.$' ? friendToAdd.customId : newId;
+                                case 'TestDatabaseNoKey': return method.desc === 'toArray()' ? friendToAdd.customId : newId;
                                 default: return newId;
                             }
                         });
@@ -207,7 +207,7 @@ describe('Rxjs', () => {
                             const emitPromise = new Promise(resolve => {
                                 subs.add(method$(
                                     database.desc === 'TestDatabaseCustomKey' ||
-                                        (database.desc === 'TestDatabaseNoKey' && method.desc === 'Table.$') ?
+                                        (database.desc === 'TestDatabaseNoKey' && method.desc === 'toArray()') ?
                                         friends[12].customId :
                                         13,
                                     { emitUndefined: true }
@@ -290,11 +290,11 @@ describe('Rxjs', () => {
                                 let a: Observable<any> | undefined;
                                 let b: Observable<any> | undefined;
                                 switch (method.desc) {
-                                    case 'Table.$': a = db.friends.$; b = db.friends.$; break;
+                                    case 'Table.$': a = db.friends.$.toArray(); b = db.friends.$.toArray(); break;
                                     case 'Collection.$': {
-                                        const collection = db.friends.where(':id').equals(id);
-                                        a = collection.$;
-                                        b = collection.$;
+                                        const collection = db.friends.$.where(':id').equals(id);
+                                        a = collection.toArray();
+                                        b = collection.toArray();
                                         break;
                                     }
                                 }
