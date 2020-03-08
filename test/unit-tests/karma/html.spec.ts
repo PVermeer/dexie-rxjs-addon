@@ -73,23 +73,17 @@ describe('HTML script tag', () => {
                 methods.forEach(method => {
                     let friend: Friend;
                     let id: number;
+                    let customId: number;
                     let method$: ReturnType<typeof method.method>;
                     let obs$: ReturnType<ReturnType<typeof method.method>>;
-
-                    const addFriend = (friendToAdd: Friend) => db.friends.add(friendToAdd)
-                        .then(newId => {
-                            switch (database.desc) {
-                                case 'TestDatabaseNoKey': return method.desc === 'toArray()' ? friendToAdd.customId : newId;
-                                default: return newId;
-                            }
-                        });
 
                     describe(method.desc, () => {
                         beforeEach(async () => {
                             friend = mockFriends(1)[0];
-                            id = await addFriend(friend);
+                            id = await db.friends.add(friend);
+                            customId = friend.customId;
                             method$ = method.method(db);
-                            obs$ = method$(id);
+                            obs$ = method$(id, customId);
                         });
                         it('should be able to use observables', async () => {
                             const getFriend = await obs$.pipe(rxjs.operators.take(1)).toPromise();

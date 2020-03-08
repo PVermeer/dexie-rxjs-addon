@@ -25,7 +25,7 @@ export class ObservableTable<T, TKey> {
     private _table$: Observable<T[]> = this._db.changes$.pipe(
         filter(x => x.some(y => y.table === this._table.name)),
         startWith([]),
-        flatMap(async () => this._table.toArray()),
+        flatMap(() => this._table.toArray()),
         distinctUntilChanged(isEqual),
         shareReplay(),
     );
@@ -45,12 +45,23 @@ export class ObservableTable<T, TKey> {
         return this._db.changes$.pipe(
             filter(x => x.some(y => y.table === this._table.name)),
             filter(x => {
-                const keys = typeof keyOrequalityCriterias === 'object' && typeof keyOrequalityCriterias !== null ?
-                    Object.keys(keyOrequalityCriterias) : [keyOrequalityCriterias];
-                return x.some(y => keys.includes(y.key));
+                if (typeof keyOrequalityCriterias === 'object' && typeof keyOrequalityCriterias !== null) {
+
+                    return Object.entries(keyOrequalityCriterias).some(([key, value]) =>
+                        x.some(y => {
+                            const obj = 'obj' in y ? y.obj : y.oldObj;
+                            return obj[key] && obj[key] === value ? true :
+                                y.key === value ? true : false;
+                        })
+                    );
+
+                } else {
+                    const primKey = keyOrequalityCriterias;
+                    return x.some(y => primKey === y.key);
+                }
             }),
             startWith(null),
-            flatMap(async () => this._table.get(keyOrequalityCriterias)),
+            flatMap(() => this._table.get(keyOrequalityCriterias)),
             distinctUntilChanged(isEqual),
             share(),
         );

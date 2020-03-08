@@ -7,6 +7,7 @@ import { dexieRxjs } from '../../src';
 export interface Friend {
     id?: number;
     testProp?: string;
+    age: number;
     hasAge?: boolean;
     firstName: string;
     lastName: string;
@@ -27,7 +28,7 @@ export const databasesPositive = [
                 dexieRxjs(this);
                 this.on('blocked', () => false);
                 this.version(1).stores({
-                    friends: '++id, customId, firstName, lastName, shoeSize, age'
+                    friends: '++id, customId, firstName, lastName, shoeSize, age, [age+shoeSize]'
                 });
             }
         }('TestDatabase')
@@ -41,7 +42,7 @@ export const databasesPositive = [
                 dexieRxjs(this);
                 this.on('blocked', () => false);
                 this.version(1).stores({
-                    friends: '++some.id, customId, firstName, lastName, shoeSize, age'
+                    friends: '++some.id, customId, firstName, lastName, shoeSize, age, [age+shoeSize]'
                 });
             }
         }('TestDatabaseKeyPath')
@@ -55,7 +56,7 @@ export const databasesPositive = [
                 dexieRxjs(this);
                 this.on('blocked', () => false);
                 this.version(1).stores({
-                    friends: 'customId, firstName, lastName, shoeSize, age'
+                    friends: 'customId, firstName, lastName, shoeSize, age, [age+shoeSize]'
                 });
             }
         }('TestDatabaseCustomKey')
@@ -69,7 +70,7 @@ export const databasesPositive = [
                 dexieRxjs(this);
                 this.on('blocked', () => false);
                 this.version(1).stores({
-                    friends: '++, customId, firstName, lastName, shoeSize, age'
+                    friends: '++, customId, firstName, lastName, shoeSize, age, [age+shoeSize]'
                 });
             }
         }('TestDatabaseNoKey')
@@ -110,39 +111,96 @@ export const databasesNegative = [
 interface MethodOptions {
     emitUndefined?: boolean;
     emitFull?: boolean;
+    singelton?: boolean;
 }
 export const methods = [
     {
         desc: 'get()',
-        method: (db: TestDatabaseType) => (id: number, _options?: MethodOptions) => db.friends.$.get(id)
+        singelton: false,
+        array: false,
+        alwaysEmit: false,
+        method: (db: TestDatabaseType) => (id: number, _customId: number, _options?: MethodOptions) => db.friends.$.get(id)
+    },
+    {
+        desc: 'get({id})',
+        singelton: false,
+        array: false,
+        alwaysEmit: false,
+        method: (db: TestDatabaseType) => (id: number, _customId: number, _options?: MethodOptions) =>
+            db.friends.schema.primKey.keyPath === 'id' ?
+                db.friends.$.get({ id }) :
+                db.friends.$.get({ customId: _customId })
     },
     {
         desc: 'toArray()',
-        method: (db: TestDatabaseType) => (id: number, _options: MethodOptions = { emitUndefined: false, emitFull: false }
-        ) => db.friends.$.toArray().pipe(
-            flatMap(x => {
-                if (_options.emitFull) { return of(x); }
-                /** The general method tests rely on returning undefined when not found. */
-                const find = x.find(y => y.id === id || y.customId === id || (y.some && y.some.id === id));
-                if (!find && !_options.emitUndefined) { return EMPTY; }
-                return of(find);
-            })
-        )
+        singelton: true,
+        array: true,
+        alwaysEmit: true,
+        method: (db: TestDatabaseType) => (
+            id: number,
+            _customId: number,
+            _options: MethodOptions = {}
+        ) => _options.singelton ?
+                db.friends.$.toArray() :
+                db.friends.$.toArray().pipe(
+                    flatMap(x => {
+                        if (_options.emitFull) { return of(x); }
+                        /** The general method tests rely on returning undefined when not found. */
+                        const find = x.find(y => y.id === id || y.customId === _customId || (y.some && y.some.id === id));
+                        if (!find && !_options.emitUndefined) { return EMPTY; }
+                        return of(find);
+                    })
+                )
     },
     {
         desc: 'where()',
-        method: (db: TestDatabaseType) => (id: number, _options: MethodOptions = { emitFull: false }) =>
+        singelton: false,
+        array: true,
+        alwaysEmit: false,
+        method: (db: TestDatabaseType) => (id: number, _customId: number, _options: MethodOptions = {}) =>
             db.friends.$.where(':id').equals(id).toArray().pipe(map(x => _options.emitFull ? x : x[0]))
+    },
+    {
+        desc: 'where({id})',
+        singelton: false,
+        array: true,
+        alwaysEmit: false,
+        method: (db: TestDatabaseType) => (id: number, _customId: number, _options: MethodOptions = {}) =>
+            db.friends.schema.primKey.keyPath === 'id' ?
+                db.friends.$.where({ id }).toArray().pipe(map(x => _options.emitFull ? x : x[0])) :
+                db.friends.$.where({ customId: _customId }).toArray().pipe(map(x => _options.emitFull ? x : x[0]))
+    },
+    {
+        desc: 'where([age, shoeSize])',
+        singelton: false,
+        array: true,
+        alwaysEmit: false,
+        method: (db: TestDatabaseType) => (id: number, _customId: number, _options: MethodOptions = {}) =>
+            db.friends.$.where(['age', 'shoeSize']).between([0, 0], [100, 100]).toArray().pipe(
+                flatMap(x => {
+                    if (_options.emitFull) { return of(x); }
+                    /** The general method tests rely on returning undefined when not found. */
+                    const find = x.find(y => y.id === id || y.customId === _customId || (y.some && y.some.id === id));
+                    if (!find && !_options.emitUndefined) { return EMPTY; }
+                    return of(find);
+                })
+            )
     }
 ];
 
+let customId = 1000000;
 export const mockFriends = (count: number = 5): Friend[] => {
     const friend = () => ({
         firstName: faker.name.firstName(),
         lastName: faker.name.lastName(),
         age: faker.random.number({ min: 1, max: 80 }),
         shoeSize: faker.random.number({ min: 5, max: 12 }),
-        customId: faker.random.number({ min: 1000000, max: 9999999 }),
+        customId
     });
-    return new Array(count).fill(null).map(() => friend());
+    return new Array(count).fill(null).map(() => {
+        const mockfriend = friend();
+        mockfriend.customId = customId;
+        customId++;
+        return mockfriend;
+    });
 };

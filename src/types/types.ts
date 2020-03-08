@@ -25,4 +25,8 @@ declare module 'dexie-observable/api' {
         oldObj: any;
         obj: any;
     }
+
+    interface IDeleteChange {
+        oldObj: any;
+    }
 }

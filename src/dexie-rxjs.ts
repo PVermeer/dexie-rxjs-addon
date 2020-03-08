@@ -15,15 +15,6 @@ export function dexieRxjs(db: Dexie) {
         rxjs: true
     };
 
-    function checkSchema() {
-        const unSupported = db.tables.some(table =>
-            [table.schema.primKey, ...table.schema.indexes].some(index => index.compound || index.multi));
-
-        if (unSupported) {
-            throw new Error('Compound or multi indices are not (yet) supported in combination with Dexie RxJs Addon');
-        }
-    }
-
     // Extend the DB class
     type ChangeCb = [IDatabaseChange[], boolean];
     Object.defineProperty(db, 'changes$', {
@@ -37,9 +28,5 @@ export function dexieRxjs(db: Dexie) {
     Object.defineProperty(db, 'Table', {
         value: getTableExtended(dbExtended)
     });
-
-    db.on('populate', checkSchema);
-    db.on('versionchange', checkSchema);
-    db.on('ready', checkSchema);
 
 }
