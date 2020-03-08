@@ -17,9 +17,9 @@ function karmaConfig(config) {
             // Serve dist folder so files can be loaded when needed in tests
             { pattern: './dist/**/*.+(js|map)', included: false, watched: false }
         ],
-        frameworks: ['jasmine', 'detectBrowsers'],
+        frameworks: ['jasmine'],
         preprocessors: {
-            "**/*.ts": ['webpack'],
+            "**/*.ts": ['webpack']
         },
         webpack: {
             mode: 'development',
@@ -67,22 +67,8 @@ function karmaConfig(config) {
         webpackMiddleware: {
             stats: 'errors-only'
         },
-        detectBrowsers: {
-            preferHeadless: true,
-            postDetection: function (availableBrowsers) {
-                console.log('Available browser: ' + availableBrowsers);
-                const browsersToUse = availableBrowsers
-                    .filter(x => !(
-                        x.startsWith('PhantomJS') ||
-                        x.startsWith('IE')
-                    ));
-                return browsersToUse;
-            }
-        },
-        client: {
-            clearContext: false // leave Jasmine Spec Runner output visible in browser
-        },
-        reporters: ['dots', 'kjhtml', 'coverage-istanbul'],
+        browsers: ['ChromeHeadless', 'FirefoxHeadless', 'EdgeHeadless'],
+        reporters: ['dots', 'mocha', 'coverage-istanbul'],
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
