@@ -15,8 +15,7 @@
     "observable"
   ],
   "files": [
-    "dist",
-    "patches"
+    "dist"
   ],
   "publishConfig": {
     "access": "public"
