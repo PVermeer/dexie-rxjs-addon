@@ -1,3 +1,10 @@
+# [1.0.0-beta.4](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.3...v1.0.0-beta.4) (2020-03-09)
+
+
+### Bug Fixes
+
+* patch declaration for dexie-observable ([7655c9c](https://github.com/PVermeer/dexie-rxjs-addon/commit/7655c9cc03bedbae53c0c82cf3ab7daa829afa90))
+
 # [1.0.0-beta.3](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2020-03-09)
 
 
