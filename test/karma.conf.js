@@ -9,6 +9,7 @@ process.on('infrastructure_error', (error) => {
 
 function karmaConfig(config) {
     const path = require('path');
+    const configLib = require('../config');
 
     return {
         basePath: '../',
@@ -67,7 +68,11 @@ function karmaConfig(config) {
         webpackMiddleware: {
             stats: 'errors-only'
         },
-        browsers: ['ChromeHeadless', 'FirefoxHeadless', 'EdgeHeadless'],
+        browsers: require('is-ci') ?
+            ['ChromeHeadless', 'FirefoxHeadless'] :
+            configLib.runningOnOs.trim().toLowerCase().includes('windows') ?
+                ['ChromeHeadless', 'FirefoxHeadless', 'EdgeHeadless'] :
+                ['ChromeHeadless', 'FirefoxHeadless'],
         reporters: ['dots', 'mocha', 'coverage-istanbul'],
         port: 9876,
         colors: true,
