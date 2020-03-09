@@ -8,11 +8,6 @@
       "./",
       "types"
     ],
-    "paths": {
-      "dexie-observable": [
-        "src/types/dexie-observable"
-      ]
-    },
     "outDir": "./dist",
     "sourceMap": false,
     "declaration": false,
