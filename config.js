@@ -3,6 +3,7 @@
 /** @type import('type-fest').PackageJson */
 // @ts-ignore
 const packageJson = require('./package.json');
+var os = require("os").type();
 
 const packageName = (packageName) => {
     const onlyName = packageJson.name.includes('@') ?
@@ -49,7 +50,9 @@ const configLib = {
     peerDependencies: Object.keys(packageJson.peerDependencies),
 
     // Externals for webpack min build
-    peerDependenciesMapped: mapPeerDependencies()
+    peerDependenciesMapped: mapPeerDependencies(),
+
+    runningOnOs: os
 
 };
 

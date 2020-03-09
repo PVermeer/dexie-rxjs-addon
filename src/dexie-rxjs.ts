@@ -1,64 +1,32 @@
-// tslint:disable: unified-signatures
 import { Dexie } from 'dexie';
 import 'dexie-observable';
 import { IDatabaseChange } from 'dexie-observable/api';
-import { Observable } from 'rxjs';
-import { addChanges$, addGet$, addTable$, addWhere$ } from './add-properties';
-
-declare module 'dexie' {
-    interface Dexie {
-        /**
-         * Get on('changes') from 'dexie-observable' as an RxJs observable and observe changes.
-         * @link https://dexie.org/docs/Observable/Dexie.Observable
-         */
-        changes$: Observable<IDatabaseChange[]>;
-    }
-    namespace Dexie {
-        interface Table<T, Key> {
-            /**
-             * Get a full table as an RxJs observable and observe changes.
-             * Uses Table.toArray().
-             */
-            $: Observable<T[]>;
-            /**
-             * Get a single record as an RxJs observable and observe changes.
-             * Uses Table.get().
-             * @param key Primary key to find.
-             */
-            get$(key: Key): Observable<T | undefined>;
-        }
-        interface Collection<T, Key> {
-            /**
-             * Get a collection (Table.where()) as an RxJs observable and observe changes.
-             * Uses Collection.toArray().
-             */
-            $: Observable<T[]>;
-        }
-    }
-}
-
-declare module 'dexie-observable/api' {
-    interface IUpdateChange {
-        oldObj: any;
-        obj: any;
-    }
-}
+import { fromEventPattern } from 'rxjs';
+import { map, share } from 'rxjs/operators';
+import { getTableExtended } from './tableExt.class';
+import { DexieExtended } from './types/types';
 
 export function dexieRxjs(db: Dexie) {
 
-    db.on('ready', () => {
-        const unSupported = db.tables.some(table =>
-            [table.schema.primKey, ...table.schema.indexes].some(index => index.compound || index.multi)
-            , false);
+    // Register addon
+    const dbExtended = db as DexieExtended;
+    dbExtended.pVermeerAddonsRegistered = {
+        ...dbExtended.pVermeerAddonsRegistered,
+        rxjs: true
+    };
 
-        if (unSupported) {
-            throw new Error('Compound or multi indices are not (yet) supported');
-        }
+    // Extend the DB class
+    type ChangeCb = [IDatabaseChange[], boolean];
+    Object.defineProperty(db, 'changes$', {
+        value: fromEventPattern<ChangeCb>(handler => db.on('changes', handler)).pipe(
+            map(x => x[0]),
+            share()
+        )
     });
 
-    addChanges$(db);
-    addGet$(db);
-    addWhere$(db);
-    addTable$(db);
+    // Extend the Table class.
+    Object.defineProperty(db, 'Table', {
+        value: getTableExtended(dbExtended)
+    });
 
 }

@@ -8,58 +8,72 @@ process.on('infrastructure_error', (error) => {
 });
 
 function karmaConfig(config) {
+    const path = require('path');
+    const configLib = require('../config');
+
     return {
         basePath: '../',
         files: [
-            './test/unit-tests/karma/**/*.ts',
-            './test/mocks/**/*.ts',
-            './src/**/*.ts',
+            './test/unit-tests/karma/index.ts',
             // Serve dist folder so files can be loaded when needed in tests
-            { pattern: './dist/**/*.+(js|map)', included: false, watch: false }
+            { pattern: './dist/**/*.+(js|map)', included: false, watched: false }
         ],
-        exclude: ['./test/unit-tests/karma/index.ts'],
-        frameworks: ['jasmine', 'karma-typescript', 'detectBrowsers'],
+        frameworks: ['jasmine'],
         preprocessors: {
-            "**/*.ts": 'karma-typescript',
+            "**/*.ts": ['webpack']
         },
-        karmaTypescriptConfig: {
-            tsconfig: './test/tsconfig.json',
-            bundlerOptions: {
-                transforms: [
-                    require("karma-typescript-es6-transform")()
-                ]
-            },
-            coverageOptions: {
-                threshold: {
-                    global: {
-                        statements: 100,
-                        branches: 100,
-                        functions: 100,
-                        lines: 100,
+        webpack: {
+            mode: 'development',
+            performance: { hints: false },
+            module: {
+                rules: [
+                    {
+                        test: /\.tsx?$/,
+                        use: 'ts-loader',
+                        exclude: /node_modules/
+                    },
+                    {
+                        test: /\.ts$/, // Setting tsx breaks it ???
+                        exclude: [path.resolve(__dirname, '../test')],
+                        enforce: 'post',
+                        use: {
+                            loader: 'istanbul-instrumenter-loader',
+                            options: { esModules: true }
+                        }
                     }
+                ],
+            },
+            resolve: {
+                extensions: ['.tsx', '.ts', '.js', '.json']
+            },
+            devtool: 'inline-source-map',
+            plugins: [
+                new ExitOnErrorWebpackPlugin()
+            ]
+        },
+        coverageIstanbulReporter: {
+            reports: ['text-summary', 'html'],
+            fixWebpackSourcePaths: true,
+            dir: path.join(__dirname, '../reports/coverage'),
+            combineBrowserReports: true,
+            thresholds: {
+                global: {
+                    statements: 100,
+                    lines: 100,
+                    branches: 100,
+                    functions: 100
                 }
             },
-            reports: {
-                "html": "./coverage",
-                "text-summary": null
-            }
         },
-        detectBrowsers: {
-            preferHeadless: true,
-            postDetection: function (availableBrowsers) {
-                console.log('Available browser: ' + availableBrowsers);
-                const browsersToUse = availableBrowsers
-                    .filter(x => !(
-                        x.startsWith('PhantomJS') ||
-                        x.startsWith('IE')
-                    ));
-                return browsersToUse;
-            }
+        webpackMiddleware: {
+            stats: 'errors-only'
         },
-        client: {
-            clearContext: false // leave Jasmine Spec Runner output visible in browser
-        },
-        reporters: ['dots', 'karma-typescript'],
+        browsers: require('is-ci') ?
+            ['ChromeHeadless', 'FirefoxHeadless'] :
+            configLib.runningOnOs.trim().toLowerCase().includes('windows') ?
+                ['ChromeHeadless', 'FirefoxHeadless', 'EdgeHeadless'] :
+                ['ChromeHeadless', 'FirefoxHeadless'],
+        reporters: ['dots', 'mocha', 'coverage-istanbul'],
         port: 9876,
         colors: true,
         logLevel: config.LOG_INFO,
@@ -67,9 +81,9 @@ function karmaConfig(config) {
             level: 'error',
             terminal: true
         },
-        autoWatch: true,
+        autoWatch: false,
         singleRun: true,
-        restartOnFileChange: true
+        restartOnFileChange: false
     };
 }
 
@@ -77,3 +91,19 @@ module.exports = function (config) {
     config.set(karmaConfig(config));
 };
 module.exports.mainKarmaConfig = karmaConfig;
+
+/**
+ * Custom plugin to exit > 0 karma when TS compiler errors
+ */
+class ExitOnErrorWebpackPlugin {
+    apply(compiler) {
+        compiler.hooks.done.tap("ExitOnErrorWebpackPlugin", stats => {
+            if (stats && stats.hasErrors()) {
+                stats.toJson().errors.forEach(err => {
+                    console.error(err);
+                });
+                process.exit(1);
+            }
+        });
+    }
+}

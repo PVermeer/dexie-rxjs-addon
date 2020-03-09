@@ -27,10 +27,7 @@ const umdConfig = {
             loader: 'ts-loader',
             exclude: /node_modules/,
             options: {
-                configFile: '../src/tsconfig.json',
-                compilerOptions: {
-                    declaration: true
-                }
+                configFile: '../src/tsconfig.bundle.json'
             }
         }]
     },
@@ -62,7 +59,7 @@ const bundleConfig = {
             loader: 'ts-loader',
             exclude: /node_modules/,
             options: {
-                configFile: '../src/tsconfig.json'
+                configFile: '../src/tsconfig.bundle.json'
             }
         }]
     },
@@ -82,9 +79,9 @@ const bundleConfig = {
         new BundleAnalyzerPlugin({
             analyzerMode: 'static',
             openAnalyzer: false,
-            reportFilename: '../reports/webpack-report.html',
+            reportFilename: '../reports/bundle/webpack-report.html',
             generateStatsFile: true,
-            statsFilename: '../reports/webpack-stats.json',
+            statsFilename: '../reports/bundle/webpack-stats.json',
             statsOptions: {
                 source: false,
                 usedExports: true,
