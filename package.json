@@ -28,11 +28,11 @@
     "lint": "tslint --project test/tsconfig.json",
     "test": "npm run build && npm run lint && npm run test:jasmine && npm run test:karma",
     "test:karma": "karma start test/karma.conf.js",
-    "test:karma:debug": "npm run build & karma start test/karma.debug.conf.js",
-    "test:jasmine": "jasmine --require=ts-node/register --config=test/jasmine.conf.json",
-    "test:jasmine:debug": "nodemon --ext ts --exec jasmine --require=ts-node/register --config=test/jasmine.conf.json --reporter=jasmine-console-reporter",
+    "test:karma:debug": "npm run build && karma start test/karma.debug.conf.js",
+    "test:jasmine": "cd test && jasmine --require=ts-node/register --config=jasmine.conf.json --reporter=jasmine-console-reporter",
+    "test:jasmine:debug": "cd test && nodemon --ext ts --exec jasmine --require=ts-node/register --config=jasmine.conf.json --reporter=jasmine-console-reporter",
     "test:coverage": "karma start test/karma.conf.js --browsers ChromeHeadless --reporters dots,coverage-istanbul",
-    "clean": "rimraf -rf coverage/ && rimraf -rf dist/ && rimraf -rf reports/",
+    "clean": "rimraf -rf dist/ && rimraf -rf reports/",
     "semantic-release": "semantic-release"
   },
   "husky": {
