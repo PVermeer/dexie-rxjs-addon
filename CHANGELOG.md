@@ -1,3 +1,20 @@
+# [1.0.0-beta.3](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.2...v1.0.0-beta.3) (2020-03-09)
+
+
+* refactor!: rxjs is now activated by using $ on a table ([0f7b571](https://github.com/PVermeer/dexie-rxjs-addon/commit/0f7b571a778c55ece4ef55b00164918ace28684b))
+* refactor!: update to dexie 3 ([3cfba47](https://github.com/PVermeer/dexie-rxjs-addon/commit/3cfba472803e8c3a9ab0af110fdfdd5c8e852ac5))
+
+
+### Bug Fixes
+
+* **errors:** now catches schema error earlier ([e0988d3](https://github.com/PVermeer/dexie-rxjs-addon/commit/e0988d3ec30d0dc60e607e55722cdd55317fe265))
+
+
+### BREAKING CHANGES
+
+* Higher maintainability by providing custom classes after $.
+* refactor to use methods not available in Dexie 2 and keep in line with other addons.
+
 # [1.0.0-beta.2](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2020-02-09)
 
 
