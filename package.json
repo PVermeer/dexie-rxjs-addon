@@ -15,14 +15,15 @@
     "observable"
   ],
   "files": [
-    "dist"
+    "dist",
+    "patches"
   ],
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
     "init": "semantic-release-cli setup",
-    "postinstall": "patch-package",
+    "postinstall": "npm run patches",
     "build": "npm run clean && npm run build:bundles && npm run build:es6",
     "build:bundles": "webpack --config webpack.config.js",
     "build:es6": "tsc -p src/tsconfig.es6.json",
@@ -34,7 +35,8 @@
     "test:jasmine:debug": "cd test && nodemon --ext ts --exec jasmine --require=ts-node/register --config=jasmine.conf.json --reporter=jasmine-console-reporter",
     "test:coverage": "karma start test/karma.conf.js --browsers ChromeHeadless --reporters dots,coverage-istanbul",
     "clean": "rimraf -rf dist/ && rimraf -rf reports/",
-    "semantic-release": "semantic-release"
+    "semantic-release": "semantic-release",
+    "patches": "path-exists node_modules && patch-package || cd ../../../ && patch-package --patch-dir node_modules/@pvermeer/dexie-rxjs-addon/patches"
   },
   "husky": {
     "hooks": {
@@ -45,7 +47,8 @@
   "dependencies": {
     "dexie-observable": "^1.0.0-beta.6",
     "lodash": "^4.17.15",
-    "patch-package": "^6.2.1"
+    "patch-package": "^6.2.1",
+    "path-exists-cli": "^1.0.0"
   },
   "devDependencies": {
     "@angular/compiler": "^8.2.14",
