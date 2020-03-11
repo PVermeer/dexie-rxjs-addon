@@ -1,4 +1,4 @@
-import { TableSchema, Transaction } from 'dexie';
+import { Dexie, TableSchema, Transaction } from 'dexie';
 import { ObservableTable } from './observableTable.class';
 import { DexieExtended } from './types/types';
 
@@ -6,15 +6,13 @@ export interface TableExtended<T, TKey> {
     $: ObservableTable<T, TKey>;
 }
 
-export function getTableExtended<T, TKey>(db: DexieExtended) {
+export function getTableExtended<T, TKey>(db: Dexie) {
 
-    const TableClass = db.Table;
+    const TableClass = db.Table as DexieExtended['Table'];
 
     return class TableExt extends TableClass<T, TKey> implements TableExtended<T, TKey> {
 
-        public db: DexieExtended;
-
-        public $: ObservableTable<T, TKey> = new ObservableTable<T, TKey>(this.db, this);
+        public $: ObservableTable<T, TKey> = new ObservableTable<T, TKey>(db, this);
 
         constructor(
             _name: string,

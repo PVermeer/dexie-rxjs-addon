@@ -1,18 +1,14 @@
-import { Collection, IndexableType, KeyRange, Table, WhereClause } from 'dexie';
+import { Collection, Dexie, IndexableType, KeyRange, Table, WhereClause } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, share, shareReplay, startWith } from 'rxjs/operators';
 import { ObservableCollection } from './observableCollection';
 import { DexieExtended } from './types/types';
 
-interface TableExtended<T, TKey> extends Table<T, TKey> {
-    db: DexieExtended;
-}
-
 // Interfaces to extend Dexie declarations. A lot of properties are not exposed :(
 interface WhereClauseExtended<T, TKey> extends WhereClause<T, TKey> {
-    Collection: new (whereClause?: WhereClause | null, keyRangeGenerator?: () => KeyRange) => Collection<T, TKey>;
-    _ctx: { table: TableExtended<T, TKey> };
+    Collection: new (whereClause?: WhereClause<T, TKey> | null, keyRangeGenerator?: () => KeyRange) => Collection<T, TKey>;
+    _ctx: { table: Table<T, TKey> };
 }
 
 type ObservableWhereClause<T, TKey> = {
@@ -76,12 +72,14 @@ export class ObservableTable<T, TKey> {
         indexOrequalityCriterias: string | string[] | { [key: string]: any }
     ): ObservableWhereClause<T, TKey> | ObservableCollection<T, TKey> {
 
+        const CollectionExt = this._db.Collection as DexieExtended['Collection'];
+
         const whereClauseOrCollection = this._table
             // No combined overload in Dexie.js, so strong typed
             .where(indexOrequalityCriterias as any) as WhereClause<T, TKey> | Collection<T, TKey>;
 
         // Check what's returned.
-        if (whereClauseOrCollection instanceof this._db.Collection) {
+        if (whereClauseOrCollection instanceof CollectionExt) {
 
             const collection = whereClauseOrCollection;
             return new ObservableCollection(this._db, this._table, collection);
@@ -95,8 +93,9 @@ export class ObservableTable<T, TKey> {
                 get(this: WhereClauseExtended<T, TKey>) {
 
                     return (whereClause?: WhereClause | null, keyRangeGenerator?: () => KeyRange) => {
-                        const collection = new this._ctx.table.db.Collection<T, TKey>(whereClause, keyRangeGenerator);
-                        return new ObservableCollection<T, TKey>(this._ctx.table.db, this._ctx.table, collection);
+                        const dbExt = this._ctx.table.db as DexieExtended;
+                        const collection = new dbExt.Collection<T, TKey>(whereClause, keyRangeGenerator);
+                        return new ObservableCollection<T, TKey>(dbExt, this._ctx.table, collection);
                     };
 
                 }
@@ -109,8 +108,8 @@ export class ObservableTable<T, TKey> {
     }
 
     constructor(
-        private _db: DexieExtended,
-        private _table: TableExtended<T, TKey>
+        private _db: Dexie,
+        private _table: Table<T, TKey>
     ) { }
 
 }

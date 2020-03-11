@@ -1,8 +1,7 @@
-import { Collection, Table } from 'dexie';
+import { Collection, Dexie, Table } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, shareReplay, startWith } from 'rxjs/operators';
-import { DexieExtended } from './types/types';
 
 export class ObservableCollection<T, TKey> {
 
@@ -17,7 +16,7 @@ export class ObservableCollection<T, TKey> {
     public toArray() { return this._collection$; }
 
     constructor(
-        private _db: DexieExtended,
+        private _db: Dexie,
         private _table: Table<T, TKey>,
         private _collection: Collection<T, TKey>
     ) { }
