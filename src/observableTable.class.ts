@@ -92,10 +92,14 @@ export class ObservableTable<T, TKey> {
             Object.defineProperty(_whereClause, 'Collection', {
                 get(this: WhereClauseExtended<T, TKey>) {
 
-                    return (whereClause?: WhereClause | null, keyRangeGenerator?: () => KeyRange) => {
-                        const dbExt = this._ctx.table.db as DexieExtended;
-                        const collection = new dbExt.Collection<T, TKey>(whereClause, keyRangeGenerator);
-                        return new ObservableCollection<T, TKey>(dbExt, this._ctx.table, collection);
+                    const table = this._ctx.table;
+                    const dbExt = table.db as DexieExtended;
+
+                    return class Callable {
+                        constructor(whereClause?: WhereClause | null, keyRangeGenerator?: () => KeyRange) {
+                            const collection = new dbExt.Collection<T, TKey>(whereClause, keyRangeGenerator);
+                            return new ObservableCollection<T, TKey>(dbExt, table, collection);
+                        }
                     };
 
                 }

@@ -26,7 +26,7 @@ export function dexieRxjs(db: Dexie) {
 
     // Extend the Table class.
     Object.defineProperty(db, 'Table', {
-        value: getTableExtended(dbExtended)
+        value: getTableExtended(db)
     });
 
 }
