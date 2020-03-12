@@ -27,7 +27,7 @@ const umdConfig = {
             loader: 'ts-loader',
             exclude: /node_modules/,
             options: {
-                configFile: '../src/tsconfig.bundle.json'
+                configFile: '../tsconfig.bundle.json'
             }
         }]
     },
@@ -59,7 +59,7 @@ const bundleConfig = {
             loader: 'ts-loader',
             exclude: /node_modules/,
             options: {
-                configFile: '../src/tsconfig.bundle.json'
+                configFile: '../tsconfig.bundle.json'
             }
         }]
     },

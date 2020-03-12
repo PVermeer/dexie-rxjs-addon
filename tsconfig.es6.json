@@ -1,20 +1,18 @@
 {
-  "extends": "../tsconfig.json",
+  "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "ES6",
     "target": "ES6",
-    "outDir": "../dist/es6",
+    "outDir": "./dist/es6",
     "sourceMap": true,
     "declaration": true,
-    "declarationDir": "../dist",
-    "stripInternal": true,
     "removeComments": false
   },
   "files": [
-    "index.ts"
+    "./src/index.ts"
   ],
   "include": [
-    "../src",
-    "../types"
+    "./src",
+    "./types"
   ]
 }

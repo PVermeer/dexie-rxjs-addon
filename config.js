@@ -28,7 +28,7 @@ function mapPeerDependencies() {
             // Map to support the exports on window / global
             // https://webpack.js.org/configuration/externals/#externals
             case 'dexie': obj[key] = 'Dexie'; break;
-            case 'rxjs': obj[key] = 'rxjs';  obj[key + '/operators'] = ['rxjs', 'operators']; break;
+            case 'rxjs': obj[key] = 'rxjs'; obj[key + '/operators'] = ['rxjs', 'operators']; break;
             default: array.push(new RegExp(`^(${key}|${key}\/.+)$`));
         }
         return array;
@@ -47,6 +47,10 @@ const configLib = {
 
     dependencies: Object.keys(packageJson.dependencies),
 
+    // If used somehow they must be inlined.
+    inlinedLibraries: Object.keys(packageJson.devDependencies)
+        .filter(x => !Object.keys(packageJson.peerDependencies).includes(x)),
+
     peerDependencies: Object.keys(packageJson.peerDependencies),
 
     // Externals for webpack min build
@@ -56,6 +60,13 @@ const configLib = {
 
 };
 
-console.log('\nUsing config: \n\n', configLib, '\n');
+const log = Object.entries(configLib).reduce((acc, [key, value]) => {
+    if (Array.isArray(value)) {
+        value = value.length > 3 ? [...value.slice(0, 3), `...${value.length - 3} more`] : value;
+    }
+    return { ...acc, [key]: value };
+}, {});
+
+console.log('\nUsing config: \n\n', log, '\n');
 
 module.exports = configLib;
