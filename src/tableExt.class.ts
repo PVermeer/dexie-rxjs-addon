@@ -1,6 +1,6 @@
 import { Dexie, TableSchema, Transaction } from 'dexie';
 import { ObservableTable } from './observableTable.class';
-import { DexieExtended } from './types/types';
+import { DexieExtended } from './types';
 
 export interface TableExtended<T, TKey> {
     $: ObservableTable<T, TKey>;

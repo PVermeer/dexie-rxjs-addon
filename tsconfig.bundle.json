@@ -8,7 +8,6 @@
     "./src/index.ts"
   ],
   "include": [
-    "./src",
-    "./types"
+    "./src"
   ]
 }

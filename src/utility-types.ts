@@ -1,15 +1,16 @@
 
-type Unpacked<T> =
+export type Unpacked<T> =
 T extends (infer U)[] ? U :
 T extends (...args: any[]) => infer V ? V :
 T extends Promise<infer W> ? W :
 never;
 
-type OmitMethods<T> = Pick<T, { [P in keyof T]: T[P] extends (...args: any[]) => any ? never : P; }[keyof T]>;
+export type OmitMethods<T> = Pick<T, { [P in keyof T]: T[P] extends (...args: any[]) => any ? never : P; }[keyof T]>;
+export type PickMethods<T> = Pick<T, { [P in keyof T]: T[P] extends (...args: any[]) => any ? P : never; }[keyof T]>;
 
-type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
+export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
 
-type TypeName<T> =
+export type TypeName<T> =
 T extends string ? 'string' :
 T extends number ? 'number' :
 T extends boolean ? 'boolean' :
@@ -19,13 +20,13 @@ T extends any[] ? 'array' :
 T extends (...args: any[]) => any ? 'function' :
 'object';
 
-type ValuesOf<T> = T[keyof T];
+export type ValuesOf<T> = T[keyof T];
 
-type UnionToIntersection<U> =
+export type UnionToIntersection<U> =
 (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I
 : never;
 
-type IsObject<T, O = TypeName<T>> =
+export type IsObject<T, O = TypeName<T>> =
 IsUnion<O> extends true ? false :
 O extends 'object' ? true :
 false;
@@ -50,5 +51,5 @@ KeepOriginal extends true ?
 T & FlattenOnce<FlattenDeepRecursive<T, KeepOriginal>> :
 FlattenOnce<FlattenDeepRecursive<T, KeepOriginal>>;
 
-type Flatten<T, KeepOriginal extends boolean = false> = FlattenDeep<Required<T>, KeepOriginal>;
+export type Flatten<T, KeepOriginal extends boolean = false> = FlattenDeep<Required<T>, KeepOriginal>;
 // =====================

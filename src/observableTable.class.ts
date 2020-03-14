@@ -1,9 +1,10 @@
+// tslint:disable: unified-signatures
 import { Collection, Dexie, IndexableType, KeyRange, Table, WhereClause } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, share, shareReplay, startWith } from 'rxjs/operators';
 import { ObservableCollection } from './observableCollection';
-import { DexieExtended } from './types/types';
+import { DexieExtended } from './types';
 
 // Interfaces to extend Dexie declarations. A lot of properties are not exposed :(
 interface WhereClauseExtended<T, TKey> extends WhereClause<T, TKey> {
@@ -23,7 +24,7 @@ export class ObservableTable<T, TKey> {
         startWith([]),
         flatMap(() => this._table.toArray()),
         distinctUntilChanged(isEqual),
-        shareReplay(),
+        shareReplay()
     );
 
     // ====== toArray() ======
@@ -35,6 +36,7 @@ export class ObservableTable<T, TKey> {
 
     get(key: TKey): Observable<T | undefined>;
     get(equalityCriterias: { [key: string]: any }): Observable<T | undefined>;
+    get(keyOrequalityCriterias: TKey | { [key: string]: any }): Observable<T | undefined>;
 
     public get(keyOrequalityCriterias: TKey | { [key: string]: any }) {
 
@@ -59,7 +61,7 @@ export class ObservableTable<T, TKey> {
             startWith(null),
             flatMap(() => this._table.get(keyOrequalityCriterias)),
             distinctUntilChanged(isEqual),
-            share(),
+            share()
         );
     }
 
@@ -112,8 +114,8 @@ export class ObservableTable<T, TKey> {
     }
 
     constructor(
-        private _db: Dexie,
-        private _table: Table<T, TKey>
+        protected _db: Dexie,
+        protected _table: Table<T, TKey>
     ) { }
 
 }

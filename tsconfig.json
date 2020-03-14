@@ -2,12 +2,6 @@
   "compileOnSave": false,
   "compilerOptions": {
     "baseUrl": "./",
-    "rootDirs": [
-      // Treat declaration files in ./types as they where in ./
-      // E.g.: declaration for config.js file 
-      "./",
-      "types"
-    ],
     "outDir": "./dist",
     "sourceMap": false,
     "declaration": false,
