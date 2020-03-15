@@ -2,8 +2,8 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "module": "ES6",
-    "target": "ES6",
-    "outDir": "./dist/es6",
+    "target": "ES5",
+    "outDir": "./dist/esm-es5",
     "sourceMap": false,
     "declaration": true,
     "removeComments": false

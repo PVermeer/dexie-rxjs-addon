@@ -22,23 +22,35 @@ const umdConfig = {
     target: 'node',
     externals: [nodeExternals()],
     module: {
-        rules: [{
-            test: /\.tsx?$/,
-            loader: 'ts-loader',
-            exclude: /node_modules/,
-            options: {
-                configFile: '../tsconfig.bundle.json'
+        rules: [
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/,
+                options: {
+                    configFile: '../tsconfig.bundle.json'
+                }
+            },
+            {
+                test: /\.m?js$/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        sourceType: 'unambiguous',
+                        presets: [['@babel/preset-env', { modules: false }]],
+                        plugins: ['@babel/plugin-transform-runtime']
+                    }
+                }
             }
-        }]
+        ]
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js', '.json']
-    },
-    devtool: 'source-map'
+    }
 };
 
 /** @type import('webpack/declarations/WebpackOptions').WebpackOptions */
-const bundleConfig = {
+const bundleMinConfig = {
     entry: './src/index.ts',
     output: {
         path: path.resolve(__dirname, 'dist'),
@@ -54,14 +66,27 @@ const bundleConfig = {
     target: 'web',
     externals: configLib.peerDependenciesMapped,
     module: {
-        rules: [{
-            test: /\.tsx?$/,
-            loader: 'ts-loader',
-            exclude: /node_modules/,
-            options: {
-                configFile: '../tsconfig.bundle.json'
+        rules: [
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                exclude: /node_modules/,
+                options: {
+                    configFile: '../tsconfig.bundle.json'
+                }
+            },
+            {
+                test: /\.m?js$/,
+                use: {
+                    loader: 'babel-loader',
+                    options: {
+                        sourceType: 'unambiguous',
+                        presets: [['@babel/preset-env', { modules: false }]],
+                        plugins: ['@babel/plugin-transform-runtime']
+                    }
+                }
             }
-        }]
+        ]
     },
     resolve: {
         extensions: ['.tsx', '.ts', '.js', '.json'],
@@ -69,7 +94,6 @@ const bundleConfig = {
             lodash: 'lodash-es'
         }
     },
-    devtool: 'source-map',
     /** @type any[] */
     plugins: [
         new LicenseWebpackPlugin({
@@ -91,4 +115,4 @@ const bundleConfig = {
     ]
 };
 
-module.exports = [umdConfig, bundleConfig];
+module.exports = [umdConfig, bundleMinConfig];

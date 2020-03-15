@@ -2,16 +2,22 @@
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
+const path = require('path');
+const configLib = require('../config');
+
 // @ts-ignore
 process.on('infrastructure_error', (error) => {
     console.error('infrastructure_error', error);
 });
 
-function karmaConfig(config) {
-    const path = require('path');
-    const configLib = require('../config');
+module.exports = /** @param {import('karma').Config} config */ function (config) {
+    /** @type {
+        { [prop: string]: any } &
+        import('karma').ConfigOptions &
+        { webpack: import('webpack/declarations/WebpackOptions').WebpackOptions }
+    } config */
 
-    return {
+    const configOptions = {
         basePath: '../',
         files: [
             './test/unit-tests/karma/index.ts',
@@ -29,8 +35,11 @@ function karmaConfig(config) {
                 rules: [
                     {
                         test: /\.tsx?$/,
-                        use: 'ts-loader',
-                        exclude: /node_modules/
+                        loader: 'ts-loader',
+                        exclude: /node_modules/,
+                        options: {
+                            configFile: path.join(__dirname + '../../test/tsconfig.json')
+                        }
                     },
                     {
                         test: /\.ts$/, // Setting tsx breaks it ???
@@ -38,13 +47,29 @@ function karmaConfig(config) {
                         enforce: 'post',
                         use: {
                             loader: 'istanbul-instrumenter-loader',
-                            options: { esModules: true }
+                            options: {
+                                configFile: path.join(__dirname + '../../test/tsconfig.json')
+                            }
+                        }
+                    },
+                    {
+                        test: /\.m?js$/,
+                        use: {
+                            loader: 'babel-loader',
+                            options: {
+                                sourceType: 'unambiguous',
+                                presets: [['@babel/preset-env', { modules: false }]],
+                                plugins: ['@babel/plugin-transform-runtime']
+                            }
                         }
                     }
                 ],
             },
             resolve: {
-                extensions: ['.tsx', '.ts', '.js', '.json']
+                extensions: ['.tsx', '.ts', '.js', '.json'],
+                alias: {
+                    lodash: 'lodash-es'
+                }
             },
             devtool: 'inline-source-map',
             plugins: [
@@ -85,20 +110,21 @@ function karmaConfig(config) {
         singleRun: true,
         restartOnFileChange: false
     };
-}
 
-module.exports = function (config) {
-    config.set(karmaConfig(config));
-};
-module.exports.mainKarmaConfig = karmaConfig;
+    config.set(configOptions);
+
+}
 
 /**
  * Custom plugin to exit > 0 karma when TS compiler errors
  */
 class ExitOnErrorWebpackPlugin {
+    // @ts-ignore
     apply(compiler) {
+        // @ts-ignore
         compiler.hooks.done.tap("ExitOnErrorWebpackPlugin", stats => {
             if (stats && stats.hasErrors()) {
+                // @ts-ignore
                 stats.toJson().errors.forEach(err => {
                     console.error(err);
                 });

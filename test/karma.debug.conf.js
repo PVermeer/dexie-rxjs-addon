@@ -2,14 +2,20 @@
 // Karma configuration file, see link for more information
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
+const path = require('path');
+
 /*
  * Using webpack for much better debug experience with tests.
  */
 
-function karmaConfig(config) {
-    const angularWebpack = require('@ngtools/webpack');
+module.exports = /** @param {import('karma').Config} config */ function (config) {
+    /** @type {
+        { [prop: string]: any } &
+        import('karma').ConfigOptions &
+        { webpack: import('webpack/declarations/WebpackOptions').WebpackOptions }
+    } config */
 
-    return {
+    const configOptions = {
         basePath: '../',
         files: [
             './test/unit-tests/karma/index.ts',
@@ -34,19 +40,31 @@ function karmaConfig(config) {
                 rules: [
                     {
                         test: /\.tsx?$/,
-                        use: '@ngtools/webpack',
+                        loader: 'ts-loader',
                         exclude: /node_modules/,
+                        options: {
+                            configFile: path.join(__dirname + '../../test/tsconfig.json')
+                        }
+                    },
+                    {
+                        test: /\.m?js$/,
+                        use: {
+                            loader: 'babel-loader',
+                            options: {
+                                sourceType: 'unambiguous',
+                                presets: [['@babel/preset-env', { modules: false }]],
+                                plugins: ['@babel/plugin-transform-runtime']
+                            }
+                        }
                     }
                 ]
             },
             resolve: {
-                extensions: ['.tsx', '.ts', '.js', '.json']
+                extensions: ['.tsx', '.ts', '.js', '.json'],
+                alias: {
+                    lodash: 'lodash-es'
+                }
             },
-            plugins: [
-                new angularWebpack.AngularCompilerPlugin({
-                    tsConfigPath: './test/tsconfig.json'
-                })
-            ],
             devtool: 'inline-source-map'
         },
         webpackMiddleware: {
@@ -74,15 +92,14 @@ function karmaConfig(config) {
         colors: true,
         logLevel: config.LOG_INFO,
         browserConsoleLogOptions: {
+            // @ts-ignore
             level: 'off',
             terminal: false
         },
         autoWatch: true,
         singleRun: false,
         restartOnFileChange: true
-    };
-}
+    }
 
-module.exports = function (config) {
-    config.set(karmaConfig(config));
-};
+    config.set(configOptions);
+}
