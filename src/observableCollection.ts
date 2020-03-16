@@ -3,7 +3,15 @@ import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, shareReplay, startWith } from 'rxjs/operators';
 
+interface CollectionExtended<T, TKey> extends Collection<T, TKey> {
+    db: Dexie;
+    _ctx: { [prop: string]: any };
+}
+
 export class ObservableCollection<T, TKey> {
+
+    db: Dexie;
+    _ctx: { [prop: string]: any };
 
     private _collection$: Observable<T[]> = this._db.changes$.pipe(
         filter(x => x.some(y => y.table === this._table.name)),
@@ -19,5 +27,18 @@ export class ObservableCollection<T, TKey> {
         private _db: Dexie,
         private _table: Table<T, TKey>,
         private _collection: Collection<T, TKey>
-    ) { }
+    ) {
+        /*
+        Class is called from some methods on the WhereClause class so
+        mixin all private methods and properties.
+        */
+        const collection = _collection as CollectionExtended<T, TKey>;
+        this.db = collection.db;
+        this._ctx = collection._ctx;
+        Object.getOwnPropertyNames(Object.getPrototypeOf(Object.getPrototypeOf(_collection))).forEach(name => {
+            if (name === 'constructor') { return; }
+            if (name.startsWith('_')) { this[name] = _collection[name]; }
+        });
+
+    }
 }
