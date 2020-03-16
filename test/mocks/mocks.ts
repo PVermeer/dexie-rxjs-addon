@@ -185,6 +185,14 @@ export const methods = [
                     return of(find);
                 })
             )
+    },
+    {
+        desc: 'where().anyOf()',
+        singelton: false,
+        array: true,
+        alwaysEmit: false,
+        method: (db: TestDatabaseType) => (id: number, _customId: number, _options: MethodOptions = {}) =>
+            db.friends.$.where(':id').anyOf([id]).toArray().pipe(map(x => _options.emitFull ? x : x[0]))
     }
 ];
 
