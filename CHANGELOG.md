@@ -1,3 +1,10 @@
+# [1.0.0-beta.8](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2020-03-16)
+
+
+### Bug Fixes
+
+* **where:** anyOf() now work as expected ([ec25884](https://github.com/PVermeer/dexie-rxjs-addon/commit/ec2588459e0f735c479ff01671492e995d6e11eb))
+
 # [1.0.0-beta.7](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2020-03-16)
 
 
