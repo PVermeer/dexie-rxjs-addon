@@ -1,3 +1,12 @@
+# [1.0.0-beta.7](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.6...v1.0.0-beta.7) (2020-03-16)
+
+
+### Bug Fixes
+
+* changed class constructor inputs to normal dexie classes ([e21f604](https://github.com/PVermeer/dexie-rxjs-addon/commit/e21f60452f683240b7580ae0499a7d32658ce0bb))
+* declarations should now work again ([2f88d42](https://github.com/PVermeer/dexie-rxjs-addon/commit/2f88d429f670c3b177c44587dd6b207d5a65ac1c))
+* **typings:** import / export types from index.ts ([a57ff6e](https://github.com/PVermeer/dexie-rxjs-addon/commit/a57ff6e0471f53b9325590c41eacb7a76a4650fc))
+
 # [1.0.0-beta.6](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.5...v1.0.0-beta.6) (2020-03-09)
 
 
