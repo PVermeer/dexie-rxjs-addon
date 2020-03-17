@@ -19,8 +19,7 @@ export class ObservableWhereClause<T, TKey> {
                 const collection = new dbExt.Collection<T, TKey>(...args);
                 return new ObservableCollection<T, TKey>(dbExt, table, collection);
             }
-        };
-
+        } as unknown as typeof ObservableCollection;
     }
 
     constructor(
