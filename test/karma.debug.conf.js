@@ -3,6 +3,7 @@
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
 const path = require('path');
+const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 /*
  * Using webpack for much better debug experience with tests.
@@ -43,7 +44,8 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
                         loader: 'ts-loader',
                         exclude: /node_modules/,
                         options: {
-                            configFile: path.join(__dirname + '../../test/tsconfig.json')
+                            configFile: path.join(__dirname + '../../test/tsconfig.json'),
+                            transpileOnly: true
                         }
                     },
                     {
@@ -65,7 +67,10 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
                     lodash: 'lodash-es'
                 }
             },
-            devtool: 'inline-source-map'
+            devtool: 'inline-source-map',
+            plugins: [
+                new ForkTsCheckerWebpackPlugin()
+            ]
         },
         webpackMiddleware: {
             stats: 'errors-only'
