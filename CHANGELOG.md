@@ -1,3 +1,10 @@
+# [1.0.0-beta.9](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2020-03-17)
+
+
+### Features
+
+* **exports:** made a class / export for observable where clause methods ([681bc0c](https://github.com/PVermeer/dexie-rxjs-addon/commit/681bc0c3110100ec2dc25c9307b7061adcebe8e0))
+
 # [1.0.0-beta.8](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.7...v1.0.0-beta.8) (2020-03-16)
 
 
