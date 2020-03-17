@@ -1,3 +1,11 @@
+# [1.0.0-beta.11](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2020-03-17)
+
+
+### Bug Fixes
+
+* exported classes are now able to be correctly extended ([6f5ae08](https://github.com/PVermeer/dexie-rxjs-addon/commit/6f5ae080332019d6d95c527d80427031cea954ae))
+* **typings:** minor typing issue ([8c851fd](https://github.com/PVermeer/dexie-rxjs-addon/commit/8c851fd3455cdaaca7d3d2711e84eee710370e44))
+
 # [1.0.0-beta.10](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2020-03-17)
 
 
