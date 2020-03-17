@@ -1,3 +1,10 @@
+# [1.0.0-beta.10](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.9...v1.0.0-beta.10) (2020-03-17)
+
+
+### Bug Fixes
+
+* **typings:** observable-where-class should now be correctly exported ([dae838e](https://github.com/PVermeer/dexie-rxjs-addon/commit/dae838e756b93e3f3860cad37fa0739d8593fff9))
+
 # [1.0.0-beta.9](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.8...v1.0.0-beta.9) (2020-03-17)
 
 
