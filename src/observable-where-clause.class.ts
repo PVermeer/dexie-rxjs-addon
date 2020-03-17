@@ -2,11 +2,11 @@ import Dexie, { Table, WhereClause } from 'dexie';
 import { ObservableCollection } from './observable-collection.class';
 import { DexieExtended } from './types';
 
-type WhereClauseObservable<T, TKey> = {
-    [P in keyof WhereClause]: WhereClause[P] extends (...args: infer A) => any ?
-    (...args: A) => ObservableCollection<T, TKey> : WhereClause[P]
+type WhereClauseRecord<T, TKey, U = Omit<WhereClause, keyof InstanceType<typeof ObservableWhereClause>>> = {
+    [P in keyof U]: U[P] extends (...args: infer A) => any ?
+    (...args: A) => ObservableCollection<T, TKey> : U[P]
 };
-export interface ObservableWhereClause<T, TKey> extends WhereClauseObservable<T, TKey> { }
+export interface ObservableWhereClause<T, TKey> extends WhereClauseRecord<T, TKey> { }
 
 export class ObservableWhereClause<T, TKey> {
 
