@@ -3,11 +3,6 @@ import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, shareReplay, startWith } from 'rxjs/operators';
 
-interface CollectionExtended<T, TKey> extends Collection<T, TKey> {
-    db: Dexie;
-    _ctx: { [prop: string]: any };
-}
-
 export class ObservableCollection<T, TKey> {
 
     db: Dexie;
@@ -24,21 +19,27 @@ export class ObservableCollection<T, TKey> {
     public toArray() { return this._collection$; }
 
     constructor(
-        private _db: Dexie,
-        private _table: Table<T, TKey>,
-        private _collection: Collection<T, TKey>
+        protected _db: Dexie,
+        protected _table: Table<T, TKey>,
+        protected _collection: Collection<T, TKey>
     ) {
-        /*
-            Class can be created from some methods on the WhereClause class so
-            mixin all private methods and properties to keep internal calls accessible.
-        */
-        const collection = _collection as CollectionExtended<T, TKey>;
-        this.db = collection.db;
-        this._ctx = collection._ctx;
-        Object.getOwnPropertyNames(Object.getPrototypeOf(Object.getPrototypeOf(_collection))).forEach(name => {
-            if (name === 'constructor') { return; }
-            if (name.startsWith('_')) { this[name] = _collection[name]; }
+
+        // Mixin with WhereClause
+        Object.keys(_collection).forEach(key => {
+            if (key === 'constructor' || this[key] !== undefined) { return; }
+            this[key] = _collection[key];
+        });
+
+        const prototype = Object.getPrototypeOf(_db.Collection.prototype);
+        Object.getOwnPropertyNames(prototype).forEach(name => {
+            if (this[name] !== undefined) { return; }
+            Object.defineProperty(
+                ObservableCollection.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(prototype, name) as any
+            );
         });
 
     }
+
 }

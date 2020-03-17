@@ -23,20 +23,25 @@ export class ObservableWhereClause<T, TKey> {
     }
 
     constructor(
-        private _db: Dexie,
-        private _table: Table<T, TKey>,
-        _whereClause: WhereClause<T, TKey>
+        protected _db: Dexie,
+        protected _table: Table<T, TKey>,
+        protected _whereClause: WhereClause<T, TKey>
     ) {
 
-        // Extend with normal whereClause
+        // Mixin with WhereClause
         Object.keys(_whereClause).forEach(key => {
             if (key === 'constructor' || this[key] !== undefined) { return; }
             this[key] = _whereClause[key];
         });
-        const prototype = Object.getPrototypeOf(Object.getPrototypeOf(_whereClause));
+
+        const prototype = Object.getPrototypeOf(_db.WhereClause.prototype);
         Object.getOwnPropertyNames(prototype).forEach(name => {
-            if (name === 'constructor' || this[name] !== undefined) { return; }
-            this[name] = prototype[name];
+            if (this[name] !== undefined) { return; }
+            Object.defineProperty(
+                ObservableWhereClause.prototype,
+                name,
+                Object.getOwnPropertyDescriptor(prototype, name) as any
+            );
         });
 
     }

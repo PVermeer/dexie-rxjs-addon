@@ -79,8 +79,7 @@ export class ObservableTable<T, TKey> {
         } else {
 
             const whereClause = whereClauseOrCollection;
-            const test = new ObservableWhereClause<T, TKey>(this._db, this._table, whereClause);
-            return test;
+            return new ObservableWhereClause<T, TKey>(this._db, this._table, whereClause);
 
         }
 
