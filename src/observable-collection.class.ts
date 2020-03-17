@@ -29,8 +29,8 @@ export class ObservableCollection<T, TKey> {
         private _collection: Collection<T, TKey>
     ) {
         /*
-        Class is called from some methods on the WhereClause class so
-        mixin all private methods and properties.
+            Class can be created from some methods on the WhereClause class so
+            mixin all private methods and properties to keep internal calls accessible.
         */
         const collection = _collection as CollectionExtended<T, TKey>;
         this.db = collection.db;

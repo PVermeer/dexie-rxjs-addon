@@ -1,10 +1,11 @@
 import { Observable } from 'rxjs';
-import { TableExtended } from './tableExt.class';
+import { TableExtended } from './table-extended.class';
 
 export { dexieRxjs } from './dexie-rxjs';
-export { TableExtended } from './tableExt.class';
-export { ObservableTable } from './observableTable.class';
-export { ObservableCollection } from './observableCollection';
+export { ObservableCollection } from './observable-collection.class';
+export { ObservableTable } from './observable-table.class';
+export { ObservableWhereClause } from './observable-where-clause.class';
+export { TableExtended } from './table-extended.class';
 
 declare module 'dexie' {
     interface Database {

@@ -73,6 +73,7 @@
     "dexie": "^3.0.0-rc.5",
     "dts-bundle-generator": "^3.3.1",
     "faker": "^4.1.0",
+    "fork-ts-checker-webpack-plugin": "^4.1.0",
     "git-branch-is": "^3.1.0",
     "husky": "^4.2.3",
     "is-ci": "^2.0.0",

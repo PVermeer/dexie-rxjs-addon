@@ -1,21 +1,11 @@
 // tslint:disable: unified-signatures
-import { Collection, Dexie, IndexableType, KeyRange, Table, WhereClause } from 'dexie';
+import { Collection, Dexie, IndexableType, Table, WhereClause } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, share, shareReplay, startWith } from 'rxjs/operators';
-import { ObservableCollection } from './observableCollection';
+import { ObservableCollection } from './observable-collection.class';
+import { ObservableWhereClause } from './observable-where-clause.class';
 import { DexieExtended } from './types';
-
-// Interfaces to extend Dexie declarations. A lot of properties are not exposed :(
-interface WhereClauseExtended<T, TKey> extends WhereClause<T, TKey> {
-    Collection: new (whereClause?: WhereClause<T, TKey> | null, keyRangeGenerator?: () => KeyRange) => Collection<T, TKey>;
-    _ctx: { table: Table<T, TKey> };
-}
-
-type ObservableWhereClause<T, TKey> = {
-    [P in keyof WhereClause]: WhereClause[P] extends (...args: infer A) => any ?
-    (...args: A) => ObservableCollection<T, TKey> : WhereClause[P]
-};
 
 export class ObservableTable<T, TKey> {
 
@@ -88,27 +78,10 @@ export class ObservableTable<T, TKey> {
 
         } else {
 
-            const _whereClause = whereClauseOrCollection as WhereClauseExtended<T, TKey>;
+            const whereClause = whereClauseOrCollection;
+            const test = new ObservableWhereClause<T, TKey>(this._db, this._table, whereClause);
+            return test;
 
-            // Override the Collection getter to return the new class
-            Object.defineProperty(_whereClause, 'Collection', {
-                get(this: WhereClauseExtended<T, TKey>) {
-
-                    const table = this._ctx.table;
-                    const dbExt = table.db as DexieExtended;
-
-                    return class Callable {
-                        constructor(whereClause?: WhereClause | null, keyRangeGenerator?: () => KeyRange) {
-                            const collection = new dbExt.Collection<T, TKey>(whereClause, keyRangeGenerator);
-                            return new ObservableCollection<T, TKey>(dbExt, table, collection);
-                        }
-                    };
-
-                }
-            });
-
-            // WhereClause now can only return ObservableCollection, so strong type the return
-            return _whereClause as unknown as ObservableWhereClause<T, TKey>;
         }
 
     }

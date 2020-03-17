@@ -3,7 +3,7 @@ import 'dexie-observable';
 import { IDatabaseChange } from 'dexie-observable/api';
 import { fromEventPattern } from 'rxjs';
 import { map, share } from 'rxjs/operators';
-import { getTableExtended } from './tableExt.class';
+import { getTableExtended } from './table-extended.class';
 import { DexieExtended } from './types';
 
 export function dexieRxjs(db: Dexie) {
