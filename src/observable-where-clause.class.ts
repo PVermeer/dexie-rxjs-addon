@@ -1,5 +1,5 @@
 import Dexie, { Table, WhereClause } from 'dexie';
-import { ObservableCollection } from './observableCollection.class';
+import { ObservableCollection } from './observable-collection.class';
 import { DexieExtended } from './types';
 
 type WhereClauseObservable<T, TKey> = {

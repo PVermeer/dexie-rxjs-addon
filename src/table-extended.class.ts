@@ -1,5 +1,5 @@
 import { Dexie, TableSchema, Transaction } from 'dexie';
-import { ObservableTable } from './observableTable.class';
+import { ObservableTable } from './observable-table.class';
 import { DexieExtended } from './types';
 
 export interface TableExtended<T, TKey> {

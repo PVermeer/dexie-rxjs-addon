@@ -3,8 +3,8 @@ import { Collection, Dexie, IndexableType, Table, WhereClause } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, filter, flatMap, share, shareReplay, startWith } from 'rxjs/operators';
-import { ObservableCollection } from './observableCollection.class';
-import { ObservableWhereClause } from './observableWhereClause.class';
+import { ObservableCollection } from './observable-collection.class';
+import { ObservableWhereClause } from './observable-where-clause.class';
 import { DexieExtended } from './types';
 
 export class ObservableTable<T, TKey> {
