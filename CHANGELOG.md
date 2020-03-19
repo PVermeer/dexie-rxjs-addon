@@ -1,3 +1,10 @@
+# [1.0.0-beta.12](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.11...v1.0.0-beta.12) (2020-03-19)
+
+
+### Features
+
+* **readme:** new documentation for new api structure ([97507ea](https://github.com/PVermeer/dexie-rxjs-addon/commit/97507ea7c2bc654ace72fc036e81b5a43a798a9c))
+
 # [1.0.0-beta.11](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.10...v1.0.0-beta.11) (2020-03-17)
 
 
