@@ -17,13 +17,19 @@ export class ObservableTable<T, TKey> {
         shareReplay()
     );
 
-    // ====== toArray() ======
-
+    /**
+     * Observable stream of the complete Table.
+     * Emits updated Table array on changes.
+     * @note Stays open so unsubscribe.
+     */
     public toArray() { return this._table$; }
 
 
-    // ====== get() ======
-
+    /**
+     * Observable stream of a get request.
+     * Emits updated value on changes.
+     * @note Stays open so unsubscribe.
+     */
     get(key: TKey): Observable<T | undefined>;
     get(equalityCriterias: { [key: string]: any }): Observable<T | undefined>;
     get(keyOrequalityCriterias: TKey | { [key: string]: any }): Observable<T | undefined>;
@@ -55,8 +61,13 @@ export class ObservableTable<T, TKey> {
         );
     }
 
-    // ====== where() ======
-
+    /**
+     * Observable stream of a where query.
+     * Emits updated values on changes, including new or updated records that are in range.
+     * @return ObservableWhereClause that behaves like a normal Dexie where-clause or an ObservableCollection.
+     * ObservableCollection has one method: `toArray()`, since RxJs operators can be used.
+     * @note Stays open so unsubscribe.
+     */
     where(index: string | string[]): ObservableWhereClause<T, TKey>;
     where(equalityCriterias: { [key: string]: IndexableType }): ObservableCollection<T, TKey>;
 
