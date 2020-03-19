@@ -16,6 +16,10 @@ export class ObservableCollection<T, TKey> {
         shareReplay()
     );
 
+    /**
+     * Get an array of the query results.
+     * @note For now RxJs operators can be used to achieve the same functionality of Dexie.Collection.
+     */
     public toArray() { return this._collection$; }
 
     constructor(
