@@ -1,17 +1,15 @@
 import { Collection, Dexie, Table } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, flatMap, shareReplay, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, flatMap, shareReplay, startWith } from 'rxjs/operators';
 
 export class ObservableCollection<T, TKey> {
 
-    db: Dexie;
-    _ctx: { [prop: string]: any };
-
     private _collection$: Observable<T[]> = this._db.changes$.pipe(
         filter(x => x.some(y => y.table === this._table.name)),
+        debounceTime(50),
         startWith([]),
-        flatMap(async () => this._collection.toArray()),
+        flatMap(() => this._collection.toArray()),
         distinctUntilChanged(isEqual),
         shareReplay()
     );

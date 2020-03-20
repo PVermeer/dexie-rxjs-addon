@@ -2,7 +2,7 @@
 import { Collection, Dexie, IndexableType, Table, WhereClause } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
-import { distinctUntilChanged, filter, flatMap, share, shareReplay, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, flatMap, share, shareReplay, startWith } from 'rxjs/operators';
 import { ObservableCollection } from './observable-collection.class';
 import { ObservableWhereClause } from './observable-where-clause.class';
 import { DexieExtended } from './types';
@@ -11,6 +11,7 @@ export class ObservableTable<T, TKey> {
 
     private _table$: Observable<T[]> = this._db.changes$.pipe(
         filter(x => x.some(y => y.table === this._table.name)),
+        debounceTime(50),
         startWith([]),
         flatMap(() => this._table.toArray()),
         distinctUntilChanged(isEqual),
@@ -54,6 +55,7 @@ export class ObservableTable<T, TKey> {
                     return x.some(y => primKey === y.key);
                 }
             }),
+            debounceTime(50),
             startWith(null),
             flatMap(() => this._table.get(keyOrequalityCriterias)),
             distinctUntilChanged(isEqual),
