@@ -1,3 +1,10 @@
+# [1.0.0-beta.13](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.12...v1.0.0-beta.13) (2020-03-20)
+
+
+### Bug Fixes
+
+* **addon-suite:** observables are now debounced ([82d74fb](https://github.com/PVermeer/dexie-rxjs-addon/commit/82d74fb7943cc85477c53e8c794248c70341df82))
+
 # [1.0.0-beta.12](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.11...v1.0.0-beta.12) (2020-03-19)
 
 
