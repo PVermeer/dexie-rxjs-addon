@@ -78,5 +78,5 @@ describe('HTML script tag', () => {
         const id = await db.friends.add(friend);
         const getFriend = await db.friends.$.get(id).pipe(rxjs.operators.take(1)).toPromise();
         expect(getFriend).toEqual(friend);
-    }, 99999);
+    });
 });

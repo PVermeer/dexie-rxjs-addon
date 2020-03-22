@@ -17,7 +17,8 @@ export function dexieRxjs(db: Dexie) {
 
     /* Check if dexie-observable is loaded, if not load it.
        This is needed because the HTML script tag import tries to load it while
-       the Dexie class is constructing. This is probably too late */
+       the Dexie class is constructing. This is sometimes too late */
+    /* istanbul ignore next */ // This is only covered in compiled bundle
     if (!(db.on as any).changes) {
         (dexieObservable as any)(db);
     }
