@@ -1,10 +1,10 @@
-import { Dexie } from 'dexie';
-import 'dexie-observable';
-import { IDatabaseChange } from 'dexie-observable/api';
+import type Dexie from 'dexie';
+import dexieObservable from 'dexie-observable';
+import type { IDatabaseChange } from 'dexie-observable/api';
 import { fromEventPattern } from 'rxjs';
 import { map, share } from 'rxjs/operators';
 import { getTableExtended } from './table-extended.class';
-import { DexieExtended } from './types';
+import type { DexieExtended } from './types';
 
 export function dexieRxjs(db: Dexie) {
 
@@ -14,6 +14,13 @@ export function dexieRxjs(db: Dexie) {
         ...dbExtended.pVermeerAddonsRegistered,
         rxjs: true
     };
+
+    /* Check if dexie-observable is loaded, if not load it.
+       This is needed because the HTML script tag import tries to load it while
+       the Dexie class is constructing. This is probably too late */
+    if (!(db.on as any).changes) {
+        (dexieObservable as any)(db);
+    }
 
     // Extend the DB class
     type ChangeCb = [IDatabaseChange[], boolean];
