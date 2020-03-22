@@ -35,7 +35,7 @@
     "test:karma:debug": "npm run build && karma start test/karma.debug.conf.js",
     "test:jasmine": "cd test && jasmine --require=ts-node/register --config=jasmine.conf.json --reporter=jasmine-console-reporter",
     "test:jasmine:debug": "cd test && nodemon --ext ts --exec jasmine --require=ts-node/register --config=jasmine.conf.json --reporter=jasmine-console-reporter",
-    "test:coverage": "karma start test/karma.conf.js --browsers ChromeHeadless --reporters dots,coverage-istanbul",
+    "test:coverage": "rimraf -rf reports/coverage/ && karma start test/karma.conf.js --browsers ChromeHeadless --reporters dots,coverage-istanbul",
     "clean": "rimraf -rf dist/ && rimraf -rf reports/",
     "semantic-release": "semantic-release",
     "patches": "path-exists node_modules && patch-package || cd ../../../ && patch-package --patch-dir node_modules/@pvermeer/dexie-rxjs-addon/patches"
@@ -71,7 +71,7 @@
     "@types/lodash-es": "^4.17.3",
     "babel-loader": "^8.0.6",
     "dexie": "^3.0.0-rc.5",
-    "dts-bundle-generator": "^3.3.1",
+    "dts-bundle-generator": "^4.0.0",
     "faker": "^4.1.0",
     "fork-ts-checker-webpack-plugin": "^4.1.0",
     "git-branch-is": "^3.1.0",

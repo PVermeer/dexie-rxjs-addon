@@ -1,4 +1,4 @@
-import { Dexie, TableSchema, Transaction } from 'dexie';
+import Dexie, { TableSchema, Transaction } from 'dexie';
 import { ObservableTable } from './observable-table.class';
 import { DexieExtended } from './types';
 

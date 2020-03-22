@@ -1,4 +1,4 @@
-import { Dexie, Collection, KeyRange, Table, TableSchema, Transaction, WhereClause } from 'dexie';
+import Dexie, { Collection, KeyRange, Table, TableSchema, Transaction, WhereClause } from 'dexie';
 
 export interface DexieExtended extends Dexie {
     pVermeerAddonsRegistered?: { [addon: string]: boolean };
