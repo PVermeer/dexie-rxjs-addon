@@ -1,5 +1,5 @@
 // tslint:disable: unified-signatures
-import { Collection, Dexie, IndexableType, Table, WhereClause } from 'dexie';
+import Dexie, { Collection, IndexableType, Table, WhereClause } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, flatMap, share, shareReplay, startWith } from 'rxjs/operators';

@@ -1,4 +1,4 @@
-import { Collection, Dexie, Table } from 'dexie';
+import Dexie, { Collection, Table } from 'dexie';
 import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, flatMap, shareReplay, startWith } from 'rxjs/operators';

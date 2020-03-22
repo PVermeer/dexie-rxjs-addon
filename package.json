@@ -71,7 +71,7 @@
     "@types/lodash-es": "^4.17.3",
     "babel-loader": "^8.0.6",
     "dexie": "^3.0.0-rc.5",
-    "dts-bundle-generator": "^3.3.1",
+    "dts-bundle-generator": "^4.0.0",
     "faker": "^4.1.0",
     "fork-ts-checker-webpack-plugin": "^4.1.0",
     "git-branch-is": "^3.1.0",

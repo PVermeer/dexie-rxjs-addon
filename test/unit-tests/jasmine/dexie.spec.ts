@@ -1,4 +1,4 @@
-import { Dexie as DexieImport } from 'dexie';
+import type Dexie from 'dexie';
 
 // declare interface DexieRxjsAddonType { dexieRxjs: typeof dexieRxjs; }
 
@@ -7,7 +7,7 @@ import { Dexie as DexieImport } from 'dexie';
  */
 describe('Dexie', () => {
     describe('Node require', () => {
-        let DexieReq: typeof DexieImport;
+        let DexieReq: typeof Dexie;
         beforeAll(() => {
             DexieReq = require('dexie');
             require('rxjs');
