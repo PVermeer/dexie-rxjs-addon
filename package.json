@@ -4,6 +4,14 @@
   "description": "Addon for Dexie.js database to add rxjs observables",
   "main": "dist/index.js",
   "module": "dist/esm-es5/index.js",
+  "types": "./dist/index.d.ts",
+  "typesVersions": {
+    "<3.8": {
+      "*": [
+        "./dist/ts3.4/index.d.ts"
+      ]
+    }
+  },
   "author": "PVermeer",
   "license": "MIT",
   "keywords": [
@@ -24,11 +32,12 @@
   "scripts": {
     "init": "semantic-release-cli setup",
     "postinstall": "npm run patches",
-    "build": "npm run clean && npm run build:bundles && npm run build:es6 && npm run build:esm-es5 && npm run build:declaration",
+    "build": "npm run clean && npm run build:bundles && npm run build:es6 && npm run build:esm-es5 && npm run build:declaration && npm run build:dl-dts",
     "build:bundles": "webpack --config webpack.config.js",
     "build:esm-es5": "tsc -p tsconfig.esm-es5.json",
     "build:es6": "tsc -p tsconfig.es6.json",
     "build:declaration": "dts-bundle-generator --config dts-bundler.config.js",
+    "build:dl-dts": "rimraf -rf dist/ts3.4 && downlevel-dts ./dist ./dist/ts3.4",
     "lint": "tslint --project tsconfig.json",
     "test": "npm run build && npm run lint && npm run test:jasmine && npm run test:karma",
     "test:karma": "karma start test/karma.conf.js",
@@ -71,6 +80,7 @@
     "@types/lodash-es": "^4.17.3",
     "babel-loader": "^8.0.6",
     "dexie": "^3.0.0-rc.5",
+    "downlevel-dts": "^0.4.0",
     "dts-bundle-generator": "^4.0.0",
     "faker": "^4.1.0",
     "fork-ts-checker-webpack-plugin": "^4.1.0",
