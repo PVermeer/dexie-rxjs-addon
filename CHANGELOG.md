@@ -1,3 +1,10 @@
+# [1.0.0-beta.15](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.14...v1.0.0-beta.15) (2020-03-23)
+
+
+### Bug Fixes
+
+* **declarations:** added support for older TS versions ([0a8360e](https://github.com/PVermeer/dexie-rxjs-addon/commit/0a8360ec50c303a37014b429e8ba15744ae25a17))
+
 # [1.0.0-beta.14](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.13...v1.0.0-beta.14) (2020-03-22)
 
 
