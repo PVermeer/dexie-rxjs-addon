@@ -3,7 +3,6 @@
 // https://karma-runner.github.io/1.0/config/configuration-file.html
 
 const path = require('path');
-const configLib = require('../config');
 
 // @ts-ignore
 process.on('infrastructure_error', (error) => {
@@ -38,7 +37,7 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
                         loader: 'ts-loader',
                         exclude: /node_modules/,
                         options: {
-                            configFile: path.join(__dirname + '../../test/tsconfig.json')
+                            configFile: path.join(__dirname + '../../test/tsconfig.test.json')
                         }
                     },
                     {
@@ -48,7 +47,7 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
                         use: {
                             loader: 'istanbul-instrumenter-loader',
                             options: {
-                                configFile: path.join(__dirname + '../../test/tsconfig.json')
+                                configFile: path.join(__dirname + '../../test/tsconfig.test.json')
                             }
                         }
                     },
@@ -93,11 +92,13 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
         webpackMiddleware: {
             stats: 'errors-only'
         },
-        browsers: require('is-ci') ?
-            ['ChromeHeadless', 'FirefoxHeadless'] :
-            configLib.runningOnOs.trim().toLowerCase().includes('windows') ?
-                ['ChromeHeadless', 'FirefoxHeadless', 'EdgeHeadless'] :
-                ['ChromeHeadless', 'FirefoxHeadless'],
+        customLaunchers: {
+            ChromeHeadless_no_sandbox: {
+                base: 'ChromeHeadless',
+                flags: ['--no-sandbox']
+            }
+        },
+        browsers: ['ChromeHeadless_no_sandbox', 'FirefoxHeadless'],
         reporters: ['dots', 'mocha', 'coverage-istanbul'],
         port: 9876,
         colors: true,

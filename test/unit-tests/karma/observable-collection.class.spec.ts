@@ -8,6 +8,7 @@ describe('ObservableCollection class', () => {
         await db.open();
         const collection = db.friends.where(':id').anyOf();
         expect(collection).toBeTruthy();
+        await db.delete();
     });
     it(`should have the correct constructor`, async () => {
         const db = databasesPositive[0].db(Dexie);
@@ -19,5 +20,7 @@ describe('ObservableCollection class', () => {
         (collection as any).constructor = function Test() { };
         const whereClass2 = new ObservableCollection(db, db.friends, collection);
         expect(whereClass2.constructor.name).toBe('ObservableCollection');
+
+        await db.delete();
     });
 });

@@ -5,6 +5,37 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Docker: Attach to Jasmine",
+            "type": "node",
+            "request": "attach",
+            "remoteRoot": "/home/app",
+            "sourceMapPathOverrides": {
+                "/home/app/*": "${workspaceRoot}/*",
+            },
+            "trace": "verbose",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "port": 9229
+        },
+        {
+            "name": "Docker: Attach to Karma",
+            "type": "chrome",
+            "request": "attach",
+            "address": "127.0.0.1",
+            "port": 9339,
+            "webRoot": "${workspaceFolder}",
+            "pathMapping": {
+                "/_karma_webpack_": "${workspaceFolder}"
+            },
+            "sourceMapPathOverrides": {
+                "webpack:/*": "${webRoot}/*"
+            },
+            "skipFiles": [
+                "<node_internals>/**"
+            ]
+        },
+        {
             "name": "Attach to Karma",
             "type": "chrome",
             "request": "attach",

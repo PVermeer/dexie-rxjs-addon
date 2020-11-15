@@ -9,6 +9,7 @@ describe('ObservableWhereClause class', () => {
         const whereClause = db.friends.where(':id');
         const whereClass = new ObservableWhereClause(db, db.friends, whereClause);
         expect(new whereClass.Collection(whereClause) instanceof ObservableCollection).toBeTrue();
+        await db.delete();
     });
     it(`should have the correct constructor`, async () => {
         const db = databasesPositive[0].db(Dexie);
@@ -20,5 +21,7 @@ describe('ObservableWhereClause class', () => {
         (whereClause as any).constructor = function Test() { };
         const whereClass2 = new ObservableWhereClause(db, db.friends, whereClause);
         expect(whereClass2.constructor.name).toBe('ObservableWhereClause');
+
+        await db.delete();
     });
 });

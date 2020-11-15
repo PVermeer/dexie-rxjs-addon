@@ -1,0 +1,16 @@
+{
+    "extends": "../tsconfig.json",
+    "compilerOptions": {
+        "sourceMap": true,
+        "module": "CommonJS",
+        "moduleResolution": "node",
+        "removeComments": false,
+        "esModuleInterop": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noImplicitAny": false
+    },
+    "include": [
+        "../test"
+    ]
+}
