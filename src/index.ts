@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 import { Observable } from 'rxjs';
 import { TableExtended } from './table-extended.class';
 

@@ -1,0 +1,20 @@
+# /*
+# /*/
+# !/dist
+# !/apps
+# !/patches
+# !package.json
+# !package-lock.json
+
+/node_modules
+/.github
+/.vscode
+/dist
+/reports
+/deployments
+/.git
+/.github
+/.vscode
+.dockerignore
+debug.log
+CHANGELOG.md

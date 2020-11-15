@@ -71,7 +71,6 @@ describe('HTML script tag', () => {
         const id = await db.friends.add(friend);
         const getFriend = await db.friends.get(id);
         expect(getFriend).toEqual(friend);
-        await db.delete();
     });
     it('should be able to use observables', async () => {
         const [friend] = mockFriends(1);

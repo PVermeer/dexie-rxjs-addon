@@ -21,7 +21,7 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
         files: [
             './test/unit-tests/karma/index.ts',
             // Serve dist folder so files can be loaded when needed in tests
-            { pattern: './dist/**/*.+(js|map)', included: false, watched: false }
+            { pattern: './dist/**/*.+(js|map)', included: false, watched: true }
         ],
         frameworks: ['jasmine'],
         plugins: [
@@ -44,7 +44,7 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
                         loader: 'ts-loader',
                         exclude: /node_modules/,
                         options: {
-                            configFile: path.join(__dirname + '../../test/tsconfig.json'),
+                            configFile: path.join(__dirname + '../../test/tsconfig.test.json'),
                             transpileOnly: true
                         }
                     },
@@ -79,16 +79,19 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
             clearContext: false // leave Jasmine Spec Runner output visible in browser
         },
         customLaunchers: {
-            ChromeDebugging: {
-                base: 'Chrome',
-                flags: ['--remote-debugging-port=9333']
+            ChromeDebuggingHeadless: {
+                base: 'ChromeHeadless',
+                flags: [
+                    '--no-sandbox',
+                    '--remote-debugging-address=0.0.0.0',
+                    '--remote-debugging-port=9229'
+                ]
             }
         },
-        browsers: ['ChromeDebugging'],
+        browsers: ['ChromeDebuggingHeadless'],
         reporters: ['mocha', 'kjhtml'],
         mochaReporter: {
-            ignoreSkipped: true,
-            maxLogLines: -1
+            ignoreSkipped: true
         },
         jasmineHtmlReporter: {
             suppressFailed: true
