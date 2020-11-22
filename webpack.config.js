@@ -89,10 +89,7 @@ const bundleMinConfig = {
         ]
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js', '.json'],
-        alias: {
-            lodash: 'lodash-es'
-        }
+        extensions: ['.tsx', '.ts', '.js', '.json']
     },
     /** @type any[] */
     plugins: [

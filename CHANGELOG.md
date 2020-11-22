@@ -1,3 +1,10 @@
+# [1.0.0-beta.17](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.16...v1.0.0-beta.17) (2020-11-22)
+
+
+### Bug Fixes
+
+* **build:** do not require full lodash as a dependency ([eba3e45](https://github.com/PVermeer/dexie-rxjs-addon/commit/eba3e453aa8a65314c86ce19559c7c75a2dd7581))
+
 # [1.0.0-beta.16](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.15...v1.0.0-beta.16) (2020-11-15)
 
 

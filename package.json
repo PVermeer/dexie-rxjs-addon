@@ -1,6 +1,6 @@
 {
   "name": "@pvermeer/dexie-rxjs-addon",
-  "version": "1.0.0-beta.16",
+  "version": "1.0.0-beta.17",
   "description": "Addon for Dexie.js database to add rxjs observables",
   "main": "dist/index.js",
   "module": "dist/esm-es5/index.js",
@@ -67,7 +67,7 @@
   },
   "dependencies": {
     "dexie-observable": "^1.0.0-beta.6",
-    "lodash": "^4.17.20",
+    "lodash.isequal": "^4.5.0",
     "tslib": "^1.14.1"
   },
   "devDependencies": {
@@ -84,8 +84,7 @@
     "@types/is-ci": "^2.0.0",
     "@types/jasmine": "^3.5.14",
     "@types/karma": "^3.0.9",
-    "@types/lodash": "^4.14.162",
-    "@types/lodash-es": "^4.17.3",
+    "@types/lodash.isequal": "^4.5.5",
     "babel-loader": "^8.1.0",
     "cross-env": "^7.0.2",
     "dexie": "^3.0.0",
@@ -113,7 +112,6 @@
     "karma-mocha-reporter": "^2.2.5",
     "karma-webpack": "^4.0.2",
     "license-webpack-plugin": "^2.3.0",
-    "lodash-es": "^4.17.15",
     "nodemon": "^2.0.4",
     "patch-package": "^6.2.2",
     "rimraf": "^3.0.2",

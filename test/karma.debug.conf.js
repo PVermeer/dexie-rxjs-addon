@@ -62,10 +62,7 @@ module.exports = /** @param {import('karma').Config} config */ function (config)
                 ]
             },
             resolve: {
-                extensions: ['.tsx', '.ts', '.js', '.json'],
-                alias: {
-                    lodash: 'lodash-es'
-                }
+                extensions: ['.tsx', '.ts', '.js', '.json']
             },
             devtool: 'inline-source-map',
             plugins: [

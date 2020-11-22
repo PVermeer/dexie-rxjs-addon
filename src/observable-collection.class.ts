@@ -1,5 +1,5 @@
 import Dexie, { Collection, Table } from 'dexie';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash.isequal';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, flatMap, shareReplay, startWith } from 'rxjs/operators';
 
