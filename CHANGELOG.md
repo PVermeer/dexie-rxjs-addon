@@ -1,3 +1,10 @@
+# [1.0.0-beta.18](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.17...v1.0.0-beta.18) (2020-11-22)
+
+
+### Bug Fixes
+
+* possible fix for test CI fail on dexie-addon-suite ([711e4e9](https://github.com/PVermeer/dexie-rxjs-addon/commit/711e4e9ff062f675c036ba35f58149950ce5d43d))
+
 # [1.0.0-beta.17](https://github.com/PVermeer/dexie-rxjs-addon/compare/v1.0.0-beta.16...v1.0.0-beta.17) (2020-11-22)
 
 
