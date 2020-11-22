@@ -1,6 +1,6 @@
 // tslint:disable: unified-signatures
 import Dexie, { Collection, IndexableType, Table, WhereClause } from 'dexie';
-import { isEqual } from 'lodash';
+import isEqual from 'lodash.isequal';
 import { Observable } from 'rxjs';
 import { debounceTime, distinctUntilChanged, filter, flatMap, share, shareReplay, startWith } from 'rxjs/operators';
 import { ObservableCollection } from './observable-collection.class';
